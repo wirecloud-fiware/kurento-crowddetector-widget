@@ -1,0 +1,99 @@
+<html>
+<head>
+	<meta content="charset=utf-8" />
+	<link rel="stylesheet" type="text/css" href="lib/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/styles.css">
+	<link rel="stylesheet" href="bower_components/ekko-lightbox/dist/ekko-lightbox.min.css">
+
+	<style type="text/css">
+		.container {
+			max-width: 300px;
+			height: 150px;
+		}
+		#myCanvas {
+			position: absolute;
+			z-index: 20;
+			background-color: transparent;
+		}
+
+		video {
+			position: absolute;
+			width: 300px;
+			height: 150px;
+			z-index: 10;
+		}
+
+	</style>
+</head>
+<body>
+
+	<div class="container">
+		<video id="v" autoplay loop src="http://techslides.com/demos/sample-videos/small.webm">
+		</video>
+		<canvas id="myCanvas">
+
+		</canvas>
+
+	</div>
+	<button id="clear">Clear</button>
+	<script>
+
+
+
+	var canvas = document.getElementById("myCanvas");
+	var video = document.getElementById("v");
+	var clear = document.getElementById("clear");
+	var ctx = canvas.getContext("2d");
+	var nDots = 0;
+	const MAX_DOTS = 4;
+
+
+	function clearDots () {
+		ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
+		nDots = 0;
+	}
+
+	function handler (e) {
+		if (nDots >= 4) {
+			return;
+		}
+		var coord = getCursorPosition(e);
+		ctx.beginPath();
+		ctx.arc(coord[0], coord[1], 4, 0, 2 * Math.PI);
+		ctx.fillStyle = "white";
+		ctx.fill();
+		ctx.stroke();
+		nDots += 1;
+	}
+
+	function getCursorPosition(e) {
+		/* returns Cell with .row and .column properties */
+		var x;
+		var y;
+		if (e.pageX != undefined && e.pageY != undefined) {
+			x = e.pageX;
+			y = e.pageY;
+		}
+		else {
+			x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+			y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+		}
+		x -= canvas.offsetLeft;
+		y -= canvas.offsetTop;
+		return [x,y];
+	}
+
+	clear.addEventListener("click", clearDots, false);
+	canvas.addEventListener("click", handler, false);
+
+	</script> 
+
+
+	<script src="lib/js/jquery.min.js"></script>
+	<script src="lib/js/bootstrap.min.js"></script>
+	<script src="lib/js/ekko-lightbox.min.js"></script>
+	<script src="lib/js/adapter.js"></script>
+	<script src="lib/js/kurento-utils.js"></script>
+	<script src="js/index.js"></script>
+</body>
+</html>
