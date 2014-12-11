@@ -6,10 +6,15 @@
 	<link rel="stylesheet" href="bower_components/ekko-lightbox/dist/ekko-lightbox.min.css">
 
 	<style type="text/css">
-		.container {
-			max-width: 300px;
-			height: 150px;
+		body {
+			margin: 0;
 		}
+
+		.container {
+			max-width: 800px;
+			height: 550px;
+		}
+		
 		#myCanvas {
 			position: absolute;
 			z-index: 20;
@@ -18,22 +23,20 @@
 
 		video {
 			position: absolute;
-			width: 300px;
-			height: 150px;
+			width: 800px;
+			height: 550px;
 			z-index: 10;
 		}
 
 	</style>
 </head>
 <body>
-
 	<div class="container">
-		<video id="v" autoplay loop src="http://techslides.com/demos/sample-videos/small.webm">
+		<video id="v" autoplay muted loop src="http://techslides.com/demos/sample-videos/small.webm">
 		</video>
-		<canvas id="myCanvas">
+		<canvas id="myCanvas" width="800px" height="550px">
 
 		</canvas>
-
 	</div>
 	<button id="clear">Clear</button>
 	<script>
@@ -43,14 +46,36 @@
 	var canvas = document.getElementById("myCanvas");
 	var video = document.getElementById("v");
 	var clear = document.getElementById("clear");
+	var container = document.getElementsByClassName("container")[0];
 	var ctx = canvas.getContext("2d");
 	var nDots = 0;
+	var dots = [];
+	var percDots = [];
 	const MAX_DOTS = 4;
 
 
 	function clearDots () {
 		ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
+		dots = [];
+		percDots = [];
 		nDots = 0;
+	}
+
+	function redraw () {
+		for (var i=0; i<dots.length; i++) {
+			ctx.beginPath();
+			ctx.arc(dots[i][0], dots[i][1], 4, 0, 2 * Math.PI);
+			ctx.fillStyle = "white";
+			ctx.fill();
+			ctx.stroke();
+		}
+	}
+
+	function adjustDots(canvasPrev) {
+		for (var i=0; i<dots.length; i++) {
+			dots[i][0] = dots[i][0]*canvas.width/canvasPrev.width;
+			dots[i][1] = dots[i][1]*canvas.height/canvasPrev.height;
+		}
 	}
 
 	function handler (e) {
@@ -63,28 +88,48 @@
 		ctx.fillStyle = "white";
 		ctx.fill();
 		ctx.stroke();
+		dots.push(coord);
 		nDots += 1;
 	}
 
 	function getCursorPosition(e) {
-		/* returns Cell with .row and .column properties */
-		var x;
-		var y;
-		if (e.pageX != undefined && e.pageY != undefined) {
-			x = e.pageX;
-			y = e.pageY;
-		}
-		else {
-			x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-			y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-		}
-		x -= canvas.offsetLeft;
-		y -= canvas.offsetTop;
+		var rect = canvas.getBoundingClientRect(),
+        	x = e.clientX - rect.left,
+        	y = e.clientY - rect.top,
+        	percX = e.offsetX/canvas.width,
+        	percY = e.offsetY/canvas.height;
+        percDots.push([percX, percY]);
+        	//console.log("Percentage position:\nX: " + e.offsetX/canvas.width + "\nY: " + e.offsetY/canvas.height)
 		return [x,y];
 	}
 
-	clear.addEventListener("click", clearDots, false);
+	function recalculate () {
+
+		var videoWidth = video.videoWidth,
+			videoHeight = video.videoHeight,
+			clientWidth = video.clientWidth,
+			clientHeight = video.clientHeight,
+			videoRatio = videoWidth / videoHeight,
+			clientRatio = clientWidth / clientHeight;
+
+		if (clientRatio > videoRatio) {
+			var canvasWidth = videoWidth - (clientHeight-videoHeight);
+			canvas.style.width = canvasWidth + 'px';
+			canvas.style.left = (clientWidth - canvasWidth) / 2;
+			canvas.style.height = clientHeight;
+		} else {
+			var canvasHeight = clientRatio * clientHeight;
+			canvas.style.height = canvasHeight + 'px';
+			canvas.style.top = (clientHeight - canvasHeight) / 2;
+			canvas.style.width = clientWidth;
+		}
+	}
+
+
 	canvas.addEventListener("click", handler, false);
+	clear.addEventListener("click", clearDots, false);
+	//video.addEventListener("load", recalculate, false);
+	//video.addEventListener("resize", recalculate, false);
 
 	</script> 
 
