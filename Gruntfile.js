@@ -24,9 +24,13 @@ module.exports = function(grunt) {
           archive: 'build/<%= pkg.vendor %>_<%= pkg.name %>_<%= pkg.version %>-dev.wgt'
         },
         files: [
-          {expand: true, src: ['config.xml', 'index.html', 'js/**/*', 'css/**/*'], cwd: 'src'},
-          {expand: true, src: ['adapter.js'], dest: 'lib', cwd: 'src/bower_components/adapter.js/samples/web/js'},
-          
+          {expand: true, src: ['config.xml', 'index.html', 'js/**/*', 'css/**/*', 'images/**/*'], cwd: 'src'},
+          {expand: true, src: ['js/adapter.js'], dest: 'lib', cwd: 'src/bower_components/adapter.js/samples/web'},
+          {expand: true, src: ['css/bootstrap.min.css', 'js/bootstrap.min.js'], dest:'lib', cwd: 'src/bower_components/bootstrap/dist'},
+          {expand: true, src: ['ekko-lightbox.min.css'], dest:'lib/css', cwd: 'src/bower_components/ekko-lightbox/dist'},
+          {expand: true, src: ['ekko-lightbox.min.js'], dest:'lib/js', cwd: 'src/bower_components/ekko-lightbox/dist'},
+          {expand: true, src: ['jquery.min.js'], dest:'lib/js', cwd: 'src/bower_components/jquery/dist'},
+          {expand: true, src: ['js/kurento-utils.js'], dest:'lib', cwd: 'src/bower_components/kurento-utils'},
         ]
       }
     },
@@ -61,18 +65,13 @@ module.exports = function(grunt) {
 
   });
 
-  grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
-  grunt.loadNpmTasks('grunt-contrib-less');
-  grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-text-replace');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-compress');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
 
   grunt.registerTask('zip', 'compress:widget');
   grunt.registerTask('version', ['replace:version']);
 
-  grunt.registerTask('default', ['jshint', 'version', 'jasmine', 'zip']);
+  grunt.registerTask('default', ['version', 'zip']);
 };
