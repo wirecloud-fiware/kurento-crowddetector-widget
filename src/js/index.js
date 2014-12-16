@@ -1,38 +1,172 @@
-/*
- * (C) Copyright 2014 Kurento (http://kurento.org/)
- *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser General Public License
- * (LGPL) version 2.1 which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/lgpl-2.1.html
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- */
-
-var ws = new WebSocket('ws://' + location.host + '/crowddetector');
-var videoInput;
-var videoOutput;
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+var nDots = 0;
+var dots = [];
+var percDots = [];
+var ws = new WebSocket('ws://130.206.81.33:8080/crowddetector');
 var webRtcPeer;
 var state = null;
+var videoInput = document.getElementById('videoInput');
+var videoOutput = document.getElementById('videoOutput');
+var prevDetection = false;
+this.setState(I_CAN_START);
 
+window.onbeforeunload = function() {
+	ws.close();
+}
+
+window.addEventListener("resize", recalculate, false);
+canvas.addEventListener("click", handler, false);
+//clear.addEventListener("click", clearDots, false);
+window.addEventListener("load", recalculate, false);
+
+const MAX_DOTS = 4;
 const I_CAN_START = 0;
 const I_CAN_STOP = 1;
 const I_AM_STARTING = 2;
 
-window.onload = function() {
-	console.log("Page loaded ...");
-	console = new Console('console', console);
-	videoInput = document.getElementById('videoInput');
-	videoOutput = document.getElementById('videoOutput');
-	setState(I_CAN_START);
+
+function clearDots () {
+	ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
+	dots = [];
+	percDots = [];
+	nDots = 0;
 }
 
-window.onbeforeunload = function() {
-	ws.close();
+function redraw (canvasPrev) {
+
+	adjustDots(canvasPrev);
+
+	for (var i=0; i<dots.length; i++) {
+		ctx.beginPath();
+		ctx.arc(dots[i].x, dots[i].y, 4, 0, 2 * Math.PI);
+		ctx.fillStyle = "white";
+		ctx.fill();
+		ctx.stroke();
+	}
+
+	if (nDots > 1) {
+		ctx.beginPath();
+		ctx.lineWidth = 4;
+		ctx.moveTo(dots[0].x, dots[0].y);
+		for (var i=1; i<dots.length; i++) {
+			ctx.lineTo(dots[i].x, dots[i].y);
+		}
+		if (nDots === 4) {
+			ctx.closePath();
+		}
+		ctx.stroke();
+
+		ctx.beginPath();
+		ctx.lineWidth = 3;
+		ctx.strokeStyle = "white";
+		ctx.moveTo(dots[0].x, dots[0].y);
+		for (var i=1; i<dots.length; i++) {
+			ctx.lineTo(dots[i].x, dots[i].y);
+		}
+		if (nDots === 4) {
+			ctx.closePath();
+		}
+		ctx.stroke();
+	}
+}
+
+function adjustDots(canvasPrev) {
+	for (var i=0; i<dots.length; i++) {
+		dots[i].x = dots[i].x*canvas.width/canvasPrev.width;
+		dots[i].y = dots[i].y*canvas.height/canvasPrev.height;
+	}
+}
+
+function handler (e) {
+	if (nDots >= 4) {
+		return;
+	}
+	var coord = getCursorPosition(e);
+	ctx.beginPath();
+	ctx.arc(coord.x, coord.y, 4, 0, 2 * Math.PI);
+	ctx.strokeStyle = "black";
+	ctx.lineWidth = 1;
+	ctx.fillStyle = "white";
+	ctx.fill();
+	ctx.stroke();
+	dots.push(coord);
+	nDots += 1;
+	if (nDots > 1) {
+		ctx.beginPath();
+		ctx.lineWidth = 4;
+		ctx.moveTo(dots[0].x, dots[0].y);
+		for (var i=1; i<dots.length; i++) {
+			ctx.lineTo(dots[i].x, dots[i].y);
+		}
+		if (nDots === 4) {
+			ctx.closePath();
+		}
+		ctx.stroke();
+
+		ctx.beginPath();
+		ctx.lineWidth = 3;
+		ctx.strokeStyle = "white";
+		ctx.moveTo(dots[0].x, dots[0].y);
+		for (var i=1; i<dots.length; i++) {
+			ctx.lineTo(dots[i].x, dots[i].y);
+		}
+		if (nDots === 4) {
+			ctx.closePath();
+			// Send 'start' request as soon as 4 points are given
+			if (prevDetection) {
+				stop();
+			}
+			start();
+		}
+		ctx.stroke();
+	}
+}
+
+function getCursorPosition(e) {
+	var rect = canvas.getBoundingClientRect(),
+    	x = e.clientX - rect.left,
+    	y = e.clientY - rect.top,
+    	percX = e.hasOwnProperty('offsetX') ? e.offsetX/canvas.width : e.layerX/canvas.width,
+    	percY = e.hasOwnProperty('offsetY') ? e.offsetY/canvas.height : e.layerY/canvas.height;
+
+    percDots.push({x: percX, y: percY});
+	return {x: x, y: y};
+}
+
+function recalculate () {
+
+	var videoWidth = videoInput.videoWidth,
+		videoHeight = videoInput.videoHeight,
+		clientWidth = videoInput.clientWidth,
+		clientHeight = videoInput.clientHeight,
+		videoRatio = videoWidth / videoHeight,
+		windowRatio = window.innerWidth/window.innerHeight,
+		canvasPrev = {width: canvas.width, height: canvas.height};
+
+
+	canvas.style.left = 0 + 'px';
+	canvas.style.top = 0 + 'px';
+	// FORMULA: original height / original width x new width = new height
+	// FORMULA: new width = new height * original width / originalheight
+
+	if (windowRatio > videoRatio) {
+		var canvasWidth = videoWidth * (clientHeight / videoHeight);
+		canvas.width = canvasWidth;
+		canvas.height = window.innerHeight;
+		canvas.style.left = (clientWidth - canvasWidth) / 2 + 'px';
+	} else {
+		var canvasHeight = videoHeight * (clientWidth / videoWidth);
+		canvas.height = canvasHeight;
+		canvas.width = window.innerWidth;
+		canvas.style.top = (clientHeight - canvasHeight) / 2 + 'px';
+	}
+
+	redraw(canvasPrev);
+}
+
+ws.onopen = function () {
+	console.log("WebSocket connected.")
 }
 
 ws.onmessage = function(message) {
@@ -87,19 +221,21 @@ function start() {
 	console.log("Starting video call ...")
 	// Disable start button
 	setState(I_AM_STARTING);
-	showSpinner(videoInput, videoOutput);
 
 	console.log("Creating WebRtcPeer and generating local sdp offer ...");
 	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, onOffer, onError);
+	prevDetection = true;
 }
 
 function onOffer(offerSdp) {
 	console.info('Invoking SDP offer callback function ' + location.host);
 	var message = {
 		id : 'start',
-		sdpOffer : offerSdp
+		sdpOffer : offerSdp,
+		dots: percDots
 	}
 	sendMessage(message);
+	clearDots();
 }
 
 function onError(error) {
@@ -110,6 +246,8 @@ function startResponse(message) {
 	setState(I_CAN_STOP);
 	console.log("SDP answer received from server. Processing ...");
 	webRtcPeer.processSdpAnswer(message.sdpAnswer);
+	videoOutput.className = "";
+	videoInput.className = "hide";
 }
 
 function stop() {
@@ -124,7 +262,6 @@ function stop() {
 		}
 		sendMessage(message);
 	}
-	hideSpinner(videoInput, videoOutput);
 }
 
 function setState(nextState) {
@@ -153,29 +290,14 @@ function setState(nextState) {
 
 function sendMessage(message) {
 	var jsonMessage = JSON.stringify(message);
-	console.log('Senging message: ' + jsonMessage);
+	console.log('Sending message: ' + jsonMessage);
 	ws.send(jsonMessage);
-}
-
-function showSpinner() {
-	for (var i = 0; i < arguments.length; i++) {
-		arguments[i].poster = './img/transparent-1px.png';
-		arguments[i].style.background = "center transparent url('./img/spinner.gif') no-repeat";
-	}
-}
-
-function hideSpinner() {
-	for (var i = 0; i < arguments.length; i++) {
-		arguments[i].src = '';
-		arguments[i].poster = './img/webrtc.png';
-		arguments[i].style.background = '';
-	}
 }
 
 /**
  * Lightbox utility (to display media pipeline image in a modal dialog)
  */
-$(document).delegate('*[data-toggle="lightbox"]', 'click', function(event) {
-	event.preventDefault();
-	$(this).ekkoLightbox();
-});
+// $(document).delegate('*[data-toggle="lightbox"]', 'click', function(event) {
+// 	event.preventDefault();
+// 	$(this).ekkoLightbox();
+// });
