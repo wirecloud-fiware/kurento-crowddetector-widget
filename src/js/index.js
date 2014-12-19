@@ -8,8 +8,23 @@ var webRtcPeer;
 var state = null;
 var videoInput = document.getElementById('videoInput');
 var videoOutput = document.getElementById('videoOutput');
+var start = document.getElementById('start');
+var clear = document.getElementById('clear');
+var stop = document.getElementById('stop');
 var prevDetection = false;
 this.setState(I_CAN_START);
+
+
+window.addEventListener("resize", recalculate, false);
+canvas.addEventListener("click", handler, false);
+clear.addEventListener("click", clearDots, false);
+window.addEventListener("load", recalculate, false);
+
+const MAX_DOTS = 4;
+const I_CAN_START = 0;
+const I_CAN_STOP = 1;
+const I_AM_STARTING = 2;
+
 
 navigator.getMedia = ( navigator.getUserMedia ||
                        navigator.webkitGetUserMedia ||
@@ -38,16 +53,6 @@ navigator.getMedia (
 window.onbeforeunload = function() {
 	ws.close();
 }
-
-window.addEventListener("resize", recalculate, false);
-canvas.addEventListener("click", handler, false);
-//clear.addEventListener("click", clearDots, false);
-window.addEventListener("load", recalculate, false);
-
-const MAX_DOTS = 4;
-const I_CAN_START = 0;
-const I_CAN_STOP = 1;
-const I_AM_STARTING = 2;
 
 
 function clearDots () {
@@ -160,6 +165,8 @@ function getCursorPosition(e) {
 
 function recalculate () {
 
+	videoInput.style.height = (window.innerHeight - 52) + 'px';
+
 	var videoWidth = videoInput.videoWidth,
 		videoHeight = videoInput.videoHeight,
 		clientWidth = videoInput.clientWidth,
@@ -167,7 +174,6 @@ function recalculate () {
 		videoRatio = videoWidth / videoHeight,
 		windowRatio = window.innerWidth/window.innerHeight,
 		canvasPrev = {width: canvas.width, height: canvas.height};
-
 
 	canvas.style.left = 0 + 'px';
 	canvas.style.top = 0 + 'px';

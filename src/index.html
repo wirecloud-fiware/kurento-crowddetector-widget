@@ -6,6 +6,29 @@
 	<link rel="stylesheet" href="lib/css/ekko-lightbox.min.css">
 </head>
 <body>
+
+	<div class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="http://www.kurento.org" target="_blank">
+            <img src="images/kurento.png" />
+          </a>
+        </div><!-- ./navbar-header -->
+        <form id="form-start" class="navbar-form form-inline navbar-left">
+          <div class="form-group">
+            <input id="name" type="text" class="form-control" placeholder="Username/Workspace">
+          </div>
+          <button id="start" type="submit" class="btn btn-success">Start</button>
+        </form>
+        <form id="form-stop" class="navbar-form form-inline navbar-right">
+          <button id="stop" type="button" class="btn btn-danger">Stop</button> 
+        </form>
+        <form id="form-clear" class="navbar-form form-inline navbar-right">
+          <button id="clear" type="button" class="btn btn-info">Clear</button> 
+        </form>
+      </div><!-- /.container-fluid -->
+    </div><!-- /.navbar -->
+
 	<video id="videoInput" autoplay muted loop poster="images/webrtc.png"></video>
 	<video id="videoOutput" class="hide" autoplay muted loop poster ="images/webrtc.png"></video>
 	<canvas id="myCanvas"></canvas>

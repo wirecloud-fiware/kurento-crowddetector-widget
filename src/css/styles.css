@@ -18,3 +18,47 @@ video {
 .hide {
 	display: none;
 }
+
+.navbar {
+	margin-bottom: 0;
+}
+
+.navbar-header {
+    float: left;
+}
+.navbar-header .navbar-brand {
+    padding: 0;
+}
+.navbar-header .navbar-brand > img {
+    margin-top: 6px;
+    margin-left: 20px;
+    height: 40px;
+}
+
+.navbar-form {
+    width: auto;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-right: 0;
+    margin-left: 0;
+    border: 0;
+    -webkit-box-shadow: none;
+            box-shadow: none;
+}
+.navbar-form .form-group {
+    display: inline-block;
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.navbar-left {
+    float: left;
+}
+
+.navbar-right {
+    float: right;
+}
+
+.container-fluid > .navbar-header {
+    margin-right: 0px;
+}
