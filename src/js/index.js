@@ -11,6 +11,29 @@ var videoOutput = document.getElementById('videoOutput');
 var prevDetection = false;
 this.setState(I_CAN_START);
 
+navigator.getMedia = ( navigator.getUserMedia ||
+                       navigator.webkitGetUserMedia ||
+                       navigator.mozGetUserMedia ||
+                       navigator.msGetUserMedia);
+
+navigator.getMedia (
+
+   // constraints
+   {
+      video: true,
+      audio: true
+   },
+
+   // successCallback
+   function(localMediaStream) {
+      videoInput.src = window.URL.createObjectURL(localMediaStream);
+   },
+
+   // errorCallback
+   function(err) {
+    console.log("Ocurrió el siguiente error: " + err);
+   });
+
 window.onbeforeunload = function() {
 	ws.close();
 }
