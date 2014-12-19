@@ -27,6 +27,7 @@ navigator.getMedia (
    // successCallback
    function(localMediaStream) {
       videoInput.src = window.URL.createObjectURL(localMediaStream);
+      recalculate();
    },
 
    // errorCallback
