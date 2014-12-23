@@ -9,7 +9,8 @@ var stream;
 var state = null;
 var videoInput = document.getElementById('videoInput');
 var videoOutput = document.getElementById('videoOutput');
-var file = document.getElementById("file");
+var file = document.getElementById('file');
+var video_url = document.getElementById('video_url');
 var prevDetection = false;
 this.setState(I_CAN_START);
 
@@ -18,14 +19,15 @@ window.onbeforeunload = function() {
 	ws.close();
 }
 
-file.addEventListener("change", playVideoFile, false);
-window.addEventListener("resize", recalculate, false);
 canvas.addEventListener("click", handler, false);
 clear.addEventListener("click", clearDots, false);
-videoInput.onloadedmetadata = function () {
+file.addEventListener("change", playVideoFile, false);
+videoInput.addEventListener("loadedmetadata", function () {
 	recalculate();
-};
+}, false); 
+video_url.addEventListener("submit", playVideoFromURL, false);
 window.addEventListener("load", recalculate, false);
+window.addEventListener("resize", recalculate, false);
 
 const MAX_DOTS = 4;
 const I_CAN_START = 0;
@@ -35,8 +37,18 @@ const I_AM_STARTING = 2;
 
 function playVideoFile (e) {
 	videoInput.src = window.URL.createObjectURL(e.currentTarget.files[0]);
-	stream = videoInput.mozCaptureStreamUntilEnded();
+	stream = videoInput.mozCaptureStream();
 	recalculate();
+}
+
+function playVideoFromURL () {
+	videoInput.src = video_url.value;
+	stream = videoInput.mozCaptureStream();
+	recalculate();
+}
+
+function handlePreferences () {
+
 }
 
 function clearDots () {
@@ -310,6 +322,9 @@ function sendMessage(message) {
 	console.log('Sending message: ' + jsonMessage);
 	ws.send(jsonMessage);
 }
+
+MashupPlatform.wiring.registerCallback('video_url', playVideoFromURL);
+MashupPlatform.prefs.registerCallback(handlePreferences);
 
 /**
  * Lightbox utility (to display media pipeline image in a modal dialog)
