@@ -9,7 +9,6 @@ var stream;
 var state = null;
 var videoInput = document.getElementById('videoInput');
 var videoOutput = document.getElementById('videoOutput');
-var file = document.getElementById("file");
 var prevDetection = false;
 this.setState(I_CAN_START);
 
@@ -18,13 +17,9 @@ window.onbeforeunload = function() {
 	ws.close();
 }
 
-file.addEventListener("change", playVideoFile, false);
 window.addEventListener("resize", recalculate, false);
 canvas.addEventListener("click", handler, false);
 clear.addEventListener("click", clearDots, false);
-videoInput.onloadedmetadata = function () {
-	recalculate();
-};
 window.addEventListener("load", recalculate, false);
 
 const MAX_DOTS = 4;
@@ -33,11 +28,30 @@ const I_CAN_STOP = 1;
 const I_AM_STARTING = 2;
 
 
-function playVideoFile (e) {
-	videoInput.src = window.URL.createObjectURL(e.currentTarget.files[0]);
-	stream = videoInput.mozCaptureStreamUntilEnded();
-	recalculate();
-}
+navigator.getMedia = ( navigator.getUserMedia ||
+                       navigator.webkitGetUserMedia ||
+                       navigator.mozGetUserMedia ||
+                       navigator.msGetUserMedia);
+
+navigator.getMedia (
+
+   // constraints
+   {
+      video: true,
+      audio: true
+   },
+
+   // successCallback
+   function(localMediaStream) {
+   	  stream = localMediaStream;
+      videoInput.src = window.URL.createObjectURL(localMediaStream);
+      recalculate();
+   },
+
+   // errorCallback
+   function(err) {
+    console.log("Ocurrió el siguiente error: " + err);
+   });
 
 function clearDots () {
 	ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
