@@ -5,19 +5,26 @@ var dots = [];
 var percDots = [];
 var ws = new WebSocket('ws://130.206.81.33:8080/crowddetector');
 var webRtcPeer;
+var stream;
 var state = null;
 var videoInput = document.getElementById('videoInput');
 var videoOutput = document.getElementById('videoOutput');
-var start = document.getElementById('start');
-var clear = document.getElementById('clear');
-var stop = document.getElementById('stop');
+var file = document.getElementById("file");
 var prevDetection = false;
 this.setState(I_CAN_START);
 
 
+window.onbeforeunload = function() {
+	ws.close();
+}
+
+file.addEventListener("change", playVideoFile, false);
 window.addEventListener("resize", recalculate, false);
 canvas.addEventListener("click", handler, false);
 clear.addEventListener("click", clearDots, false);
+videoInput.onloadedmetadata = function () {
+	recalculate();
+};
 window.addEventListener("load", recalculate, false);
 
 const MAX_DOTS = 4;
@@ -26,34 +33,11 @@ const I_CAN_STOP = 1;
 const I_AM_STARTING = 2;
 
 
-navigator.getMedia = ( navigator.getUserMedia ||
-                       navigator.webkitGetUserMedia ||
-                       navigator.mozGetUserMedia ||
-                       navigator.msGetUserMedia);
-
-navigator.getMedia (
-
-   // constraints
-   {
-      video: true,
-      audio: true
-   },
-
-   // successCallback
-   function(localMediaStream) {
-      videoInput.src = window.URL.createObjectURL(localMediaStream);
-      recalculate();
-   },
-
-   // errorCallback
-   function(err) {
-    console.log("Ocurrió el siguiente error: " + err);
-   });
-
-window.onbeforeunload = function() {
-	ws.close();
+function playVideoFile (e) {
+	videoInput.src = window.URL.createObjectURL(e.currentTarget.files[0]);
+	stream = videoInput.mozCaptureStreamUntilEnded();
+	recalculate();
 }
-
 
 function clearDots () {
 	ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
@@ -165,7 +149,9 @@ function getCursorPosition(e) {
 
 function recalculate () {
 
-	videoInput.style.height = (window.innerHeight - 52) + 'px';
+
+	videoInput.style.height = (window.innerHeight - 51) + 'px';
+	videoOutput.style.height = (window.innerHeight - 51) + 'px';
 
 	var videoWidth = videoInput.videoWidth,
 		videoHeight = videoInput.videoHeight,
@@ -175,21 +161,22 @@ function recalculate () {
 		windowRatio = window.innerWidth/window.innerHeight,
 		canvasPrev = {width: canvas.width, height: canvas.height};
 
+
 	canvas.style.left = 0 + 'px';
-	canvas.style.top = 0 + 'px';
+	canvas.style.top = 51 + 'px';
 	// FORMULA: original height / original width x new width = new height
 	// FORMULA: new width = new height * original width / originalheight
 
 	if (windowRatio > videoRatio) {
 		var canvasWidth = videoWidth * (clientHeight / videoHeight);
 		canvas.width = canvasWidth;
-		canvas.height = window.innerHeight;
+		canvas.height = window.innerHeight - 51;
 		canvas.style.left = (clientWidth - canvasWidth) / 2 + 'px';
 	} else {
 		var canvasHeight = videoHeight * (clientWidth / videoWidth);
 		canvas.height = canvasHeight;
 		canvas.width = window.innerWidth;
-		canvas.style.top = (clientHeight - canvasHeight) / 2 + 'px';
+		canvas.style.top = ((clientHeight - canvasHeight) / 2) + 51 + 'px';
 	}
 
 	redraw(canvasPrev);
@@ -253,7 +240,7 @@ function start() {
 	setState(I_AM_STARTING);
 
 	console.log("Creating WebRtcPeer and generating local sdp offer ...");
-	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput, onOffer, onError);
+	webRtcPeer = new kurentoUtils.WebRtcPeer.start('sendRecv', videoInput, videoOutput, onOffer, onError, null, stream);
 	prevDetection = true;
 }
 

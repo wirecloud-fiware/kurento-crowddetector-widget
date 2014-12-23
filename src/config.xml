@@ -8,6 +8,9 @@
     <description>A widget for selecting areas in a video tag</description>
     <authors>bgrana</authors>
   </details>
+  <preferences>
+    <preference name="standalone" label="Standalone" description="If standalone is selected, widget will ask you to introduce a video URL or to select a video file" type="boolean" default="true" />
+  </preferences>
   <wiring>
     <inputendpoint name="video_url" type="text" label="Video URL" description="Receive video url" friendcode="video_url"/>
   </wiring>
