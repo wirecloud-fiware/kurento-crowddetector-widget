@@ -45,7 +45,12 @@ navigator.getMedia (
    function(localMediaStream) {
    	  stream = localMediaStream;
       videoInput.src = window.URL.createObjectURL(localMediaStream);
-      recalculate();
+      videoInput.onloadedmetadata = function(e) {
+      	window.setTimeout(function () {
+      		console.log(videoInput.videoWidth);
+      		recalculate();
+      	}, 2000);
+      };
    },
 
    // errorCallback
