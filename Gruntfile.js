@@ -23,7 +23,6 @@ module.exports = function(grunt) {
             install: {
                 options: {
                     layout: function(type, component, source) {
-                        console.log(type);
                         return type;
                     },
                     targetDir: './src/lib'
@@ -82,7 +81,14 @@ module.exports = function(grunt) {
         clean: ['build'],
 
         jshint: {
-            all: ['src/js/**/*', 'src/test/**/*', 'Gruntfile.js', '!src/test/fixtures/']
+            options: {
+                jshintrc: true
+            },
+            all: {
+                files: {
+                    src: ['src/js/**/*', 'src/test/**/*', 'Gruntfile.js', '!src/test/fixtures/']
+                }
+            }
         }
 
     });
@@ -90,12 +96,14 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-bower-task');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-text-replace');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-compress');
 
     grunt.registerTask('default', [
         'bower:install',
         'replace:version',
+        'jshint',
         'compress:widget'
     ]);
 
