@@ -9,7 +9,7 @@
     var nDots = 0;
     var dots = [];
     var percDots = [];
-    var ws = new WebSocket('ws://130.206.81.33:8080/crowddetector');
+    var ws = null;
     var webRtcPeer;
     var stream;
     var state = null;
@@ -19,21 +19,6 @@
     var file = document.getElementById('file');
     var video_url = document.getElementById('video_url');
     var prevDetection = false;
-
-
-    window.onbeforeunload = function() {
-        ws.close();
-    };
-
-    canvas.addEventListener("click", handler, false);
-    clear.addEventListener("click", clearDots, false);
-    file.addEventListener("change", playVideoFile, false);
-    videoInput.addEventListener("loadedmetadata", function () {
-        recalculate();
-    }, false);
-    video_url.addEventListener("submit", playVideoFromURL, false);
-    window.addEventListener("load", recalculate, false);
-    window.addEventListener("resize", recalculate, false);
 
     var I_CAN_START = 0;
     var I_CAN_STOP = 1;
@@ -201,15 +186,15 @@
         redraw(canvasPrev);
     };
 
-    ws.onerror = function () {
+    var onWebsocketError = function onWebsocketError() {
         onError("Error creating WebSocket");
     };
 
-    ws.onopen = function () {
+    var onWebsocketConnection = function onWebsocketConnection() {
         MashupPlatform.widget.log("WebSocket connected.", MashupPlatform.log.INFO);
     };
 
-    ws.onmessage = function (message) {
+    var onWebsocketMessage = function onWebsocketMessage(message) {
         var parsedMessage = JSON.parse(message.data);
         MashupPlatform.widget.log('Received message: ' + message.data, MashupPlatform.log.INFO);
 
@@ -238,6 +223,15 @@
             }
             onError('Unrecognized message', parsedMessage);
         }
+    };
+
+    var connect = function connect(url) {
+        setState(I_AM_STARTING);
+
+        ws = new WebSocket(url);
+        ws.onerror = onWebsocketError;
+        ws.onopen = onWebsocketConnection;
+        ws.onmessage = onWebsocketMessage;
     };
 
     var crowdDetectorDirection = function crowdDetectorDirection(message) {
@@ -334,9 +328,26 @@
         ws.send(jsonMessage);
     };
 
+    window.onbeforeunload = function() {
+        if (ws != null) {
+            ws.close();
+        }
+    };
+
+    // Init code
+    canvas.addEventListener("click", handler, false);
+    clear.addEventListener("click", clearDots, false);
+    file.addEventListener("change", playVideoFile, false);
+
+    videoInput.addEventListener("loadedmetadata", function () {
+        recalculate();
+    }, false);
+    video_url.addEventListener("submit", playVideoFromURL, false);
+    window.addEventListener("load", recalculate, false);
+    window.addEventListener("resize", recalculate, false);
     MashupPlatform.wiring.registerCallback('video_url', playVideoFromURL);
     MashupPlatform.prefs.registerCallback(handlePreferences);
-    setState(I_CAN_START);
+    connect(MashupPlatform.prefs.get('server-url'));
 
     /**
      * Lightbox utility (to display media pipeline image in a modal dialog)

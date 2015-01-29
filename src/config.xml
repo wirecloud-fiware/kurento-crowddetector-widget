@@ -9,6 +9,7 @@
     <authors>bgrana</authors>
   </details>
   <preferences>
+    <preference name="server-url" label="Server URL" description="URL of crowd detector service" type="text" default="ws://130.206.81.33:8082/crowddetector" />
     <preference name="standalone" label="Standalone" description="If standalone is selected, widget will ask you to introduce a video URL or to select a video file" type="boolean" default="true" />
   </preferences>
   <wiring>
