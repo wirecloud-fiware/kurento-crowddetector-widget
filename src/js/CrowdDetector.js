@@ -16,12 +16,12 @@ var CrowdDetector = (function () {
     ************************VARIABLES*************************
     *********************************************************/
     var canvas, ctx, nDots, dots, percDots, ws, webRtcPeer, stream, state,
-        videoInput, videoOutput, prevDetection;
+        videoInput, videoOutput, prevDetection, url;
 
     var sendMessage, clearDots, redraw, adjustDots, addDot, recalculateCanvasSize,
         getCursorPosition, crowdDetectorDirection, crowdDetectorFluidity,
         crowdDetectorOccupancy, start, startResponse, setState, setWebSocketEvents,
-        onOffer, onError, activateCamera, stop;
+        onOffer, onError, activateCamera, stop, connect;
 
 
     /*********************************************************
@@ -34,7 +34,8 @@ var CrowdDetector = (function () {
         nDots = 0;
         dots = [];
         percDots = [];
-        ws = new WebSocket('ws://130.206.81.33:8080/crowddetector');
+        ws = null;
+        url = MashupPlatform.prefs.get('server-url');
         videoInput = document.getElementById('videoInput');
         videoOutput = document.getElementById('videoOutput');
         prevDetection = false;
@@ -42,10 +43,6 @@ var CrowdDetector = (function () {
 
         
         // Events
-        setWebSocketEvents();
-        window.onbeforeunload = function() {
-            ws.close();
-        }
         window.addEventListener("resize", recalculateCanvasSize, false);
         canvas.addEventListener("click", addDot, false);
         clear.addEventListener("click", clearDots, false);
@@ -56,12 +53,78 @@ var CrowdDetector = (function () {
         MashupPlatform.wiring.registerCallback('activate_detection', function (data) {
             activateCamera();
         });
+
+        // Register preference callback
+        MashupPlatform.prefs.registerCallback(function () {
+            url = MashupPlatform.prefs.get('server-url');
+            connect(url);
+        });
+
+        // Connect to server url
+        connect(url);
     }
 
 
     /*********************************************************
     **************************PRIVATE*************************
     *********************************************************/
+
+    connect = function connect (url) {
+
+        if (ws != null) {
+            ws.close();
+        }
+
+        ws = new WebSocket(url);
+        setWebSocketEvents();
+        window.onbeforeunload = function() {
+            if (ws != null) {
+                ws.close();
+            }
+        }
+    };
+
+    setWebSocketEvents = function setWebSocketEvents () {
+        ws.onopen = function () {
+            MashupPlatform.widget.log("WebSocket connected.", MashupPlatform.log.INFO);
+            activateCamera();
+        };
+
+        ws.onmessage = function(message) {
+            var parsedMessage = JSON.parse(message.data);
+            MashupPlatform.widget.log('Received message: ' + message.data, MashupPlatform.log.INFO);
+
+            switch (parsedMessage.id) {
+            case 'startResponse':
+                startResponse(parsedMessage);
+                break;
+            case 'crowdDetectorDirection':
+                crowdDetectorDirection(parsedMessage);
+                break;
+            case 'crowdDetectorFluidity':
+                crowdDetectorFluidity(parsedMessage);
+                break;
+            case 'crowdDetectorOccupancy':
+                crowdDetectorOccupancy(parsedMessage);
+                break;
+            case 'error':
+                if (state == I_AM_STARTING) {
+                    setState(I_CAN_START);
+                }
+                onError("Error message from server: " + parsedMessage.message);
+                break;
+            default:
+                if (state == I_AM_STARTING) {
+                    setState(I_CAN_START);
+                }
+                onError('Unrecognized message', parsedMessage);
+            }
+        };
+
+        ws.onerror = function () {
+            onError("Error creating WebSocket");
+        };
+    };
 
     activateCamera = function activateCamera () {
         navigator.getMedia = ( navigator.getUserMedia ||
@@ -258,44 +321,6 @@ var CrowdDetector = (function () {
         redraw(canvasPrev);
     };
 
-    setWebSocketEvents = function setWebSocketEvents () {
-        ws.onopen = function () {
-            console.log("WebSocket connected.");
-            //activateCamera();
-        };
-
-        ws.onmessage = function(message) {
-            var parsedMessage = JSON.parse(message.data);
-            console.info('Received message: ' + message.data);
-
-            switch (parsedMessage.id) {
-            case 'startResponse':
-                startResponse(parsedMessage);
-                break;
-            case 'crowdDetectorDirection':
-                crowdDetectorDirection(parsedMessage);
-                break;
-            case 'crowdDetectorFluidity':
-                crowdDetectorFluidity(parsedMessage);
-                break;
-            case 'crowdDetectorOccupancy':
-                crowdDetectorOccupancy(parsedMessage);
-                break;
-            case 'error':
-                if (state == I_AM_STARTING) {
-                    setState(I_CAN_START);
-                }
-                onError("Error message from server: " + parsedMessage.message);
-                break;
-            default:
-                if (state == I_AM_STARTING) {
-                    setState(I_CAN_START);
-                }
-                onError('Unrecognized message', parsedMessage);
-            }
-        };
-    };
-
     crowdDetectorDirection = function crowdDetectorDirection(message) {
         console.log ("Direction event received in roi " + message.event_data.roiID +
          " with direction " + message.event_data.directionAngle);
@@ -367,7 +392,7 @@ var CrowdDetector = (function () {
     };
 
     onError = function onError(error) {
-        console.error(error);
+        MashupPlatform.widget.log(error, MashupPlatform.log.ERROR);
     };
 
 

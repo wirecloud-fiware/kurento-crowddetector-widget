@@ -1,7 +1,7 @@
 {
   "name": "Kurento-Crowd-Detector",
   "homepage": "https://github.com/bgrana/kurento-crowddetector-widget",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "vendor": "CoNWeT",
   "author": "CoNWeT Lab., Universidad Politecnica de Madrid",
   "description": "A widget for selecting areas in a video tag.",
