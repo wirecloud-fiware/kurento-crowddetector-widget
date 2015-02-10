@@ -1,5 +1,7 @@
 node_modules/
+bower_components
 src/bower_components/
+src/lib/
 build/
 _SpecRunner.html
 .grunt/
