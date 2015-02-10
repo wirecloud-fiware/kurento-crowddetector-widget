@@ -8,7 +8,7 @@
 <body>
 	
 	<div class="navbar navbar-default navbar-fixed-top">
-      <div class="container-fluid">
+            <div class="container-fluid">
         <div class="navbar-header">
           <a class="navbar-brand" href="http://www.kurento.org" target="_blank">
             <img src="images/kurento.png" />
@@ -22,20 +22,25 @@
           <button type="submit" class="btn btn-success hide">Play</button>
         </form>
         <form id="form-clear" class="navbar-form form-inline navbar-right">
-          <button id="clear" type="button" class="btn btn-info">Clear</button> 
+            <button id="toggle-edit" type="button" class="btn btn-success">Editing</button>
+            <button id="undo" type="button" class="btn btn-info">Undo</button>
+            <button id="redo" type="button" class="btn btn-info">Redo</button>
+            <button id="clear" type="button" class="btn btn-info">Clear</button>
         </form>
       </div><!-- /.container-fluid -->
     </div><!-- /.navbar -->
 
 	<video id="videoInput" autoplay muted loop poster="images/webrtc.png"></video>
 	<video id="videoOutput" class="hide" autoplay muted loop poster ="images/webrtc.png"></video>
-	<canvas id="myCanvas"></canvas>
-
+	<div id="myCanvas"></div>
+        
 	<script src="lib/js/jquery.min.js"></script>
+        <script src="lib/js/jquery-ui.min.js"></script>
 	<script src="lib/js/bootstrap.min.js"></script>
 	<script src="lib/js/ekko-lightbox.min.js"></script>
 	<script src="lib/js/adapter.js"></script>
 	<script src="lib/js/kurento-utils.min.js"></script>
+        <script src="lib/js/dom.jsPlumb-1.7.2-min.js"></script>
 	<script src="js/index.js"></script>
 </body>
 </html>
