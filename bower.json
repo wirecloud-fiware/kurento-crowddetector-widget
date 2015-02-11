@@ -1,0 +1,36 @@
+{
+    "name": "kurento-crowddetector",
+    "dependencies": {
+        "bootstrap": "~3.3.0",
+        "ekko-lightbox": "~3.1.4",
+        "adapter.js": "*",
+        "kurento-utils": "develop",
+        "jquery-ui": "~1.9.2",
+        "jsPlumb": "~1.7.2"
+    },
+    "exportsOverride": {
+        "adapter.js": {
+            "js": "adapter.js"
+        },
+        "jquery": {
+            "js": "dist/jquery.min.js"
+        },
+        "jquery-ui": {
+            "js": "ui/minified/jquery-ui.min.js"
+        },
+        "bootstrap": {
+            "css": "dist/css/bootstrap.min.css",
+            "js": "dist/js/bootstrap.min.js"
+        },
+        "ekko-lightbox": {
+            "css": "dist/ekko-lightbox.min.css",
+            "js": "dist/ekko-lightbox.min.js"
+        },
+        "kurento-utils": {
+            "js": "js/kurento-utils.min.js"
+        },
+        "jsPlumb": {
+            "js": "dist/js/dom.jsPlumb-1.7.2-min.js"
+        }
+    }
+}
