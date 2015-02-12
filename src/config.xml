@@ -7,6 +7,7 @@
     <smartphoneimage>images/catalogueSmartphone.png</smartphoneimage>
     <description>A widget for selecting areas in a video tag</description>
     <authors>bgrana</authors>
+    <changelog>doc/changelog.md</changelog>
   </details>
   <preferences>
     <preference name="server-url" label="Server URL" description="URL of crowd detector service" type="text" default="ws://130.206.81.33:8082/crowddetector" />
