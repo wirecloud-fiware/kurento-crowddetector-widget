@@ -8,6 +8,7 @@
     <description>A widget for selecting areas in a video tag</description>
     <authors>bgrana</authors>
     <changelog>doc/changelog.md</changelog>
+    <doc>doc/index.md</doc>
   </details>
   <preferences>
     <preference name="server-url" label="Server URL" description="URL of crowd detector service" type="text" default="ws://130.206.81.33:8082/crowddetector" />
