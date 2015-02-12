@@ -1,3 +1,6 @@
+/*globals CrowdDetector */
 window.onload = function () {
-	var crowdDetector = new CrowdDetector();
+    "use strict";
+    new CrowdDetector();
+    //var crowdDetector = new CrowdDetector();
 };

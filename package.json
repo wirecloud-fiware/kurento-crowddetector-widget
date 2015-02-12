@@ -1,7 +1,7 @@
 {
     "name": "Kurento-Crowd-Detector",
     "homepage": "https://github.com/bgrana/kurento-crowddetector-widget",
-    "version": "0.2.3",
+    "version": "0.2.48",
     "vendor": "CoNWeT",
     "author": "CoNWeT Lab., Universidad Politecnica de Madrid",
     "description": "A widget for selecting areas in a video tag.",
@@ -34,8 +34,10 @@
         "grunt-contrib-clean": "~0.6.0",
         "grunt-contrib-compress": "^0.11.0",
         "grunt-contrib-jasmine": "^0.8.1",
-        "grunt-text-replace": "~0.4.0",
         "grunt-contrib-jshint": "^0.10.0",
+        "grunt-jscs": "^1.2.0",
+        "grunt-template-jasmine-istanbul": "^0.3.0",
+        "grunt-text-replace": "~0.4.0",
         "jquery": "^2.1.1"
     }
 }
