@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="CoNWeT" name="crowddetector" version="0.0.2">
+<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="CoNWeT" name="crowddetector" version="0.2.48">
   <details>
     <title>Kurento Crowd Detector</title>
     <email>bgrana@conwet.com</email>
@@ -10,10 +10,9 @@
   </details>
   <preferences>
     <preference name="server-url" label="Server URL" description="URL of crowd detector service" type="text" default="ws://130.206.81.33:8082/crowddetector" />
-    <preference name="standalone" label="Standalone" description="If standalone is selected, widget will ask you to introduce a video URL or to select a video file" type="boolean" default="true" />
   </preferences>
   <wiring>
-    <inputendpoint name="video_url" type="text" label="Video URL" description="Receive video url" friendcode="video_url"/>
+    <inputendpoint name="activate_detection" type="text" label="Activates crowd detection" description="Start crowd detection" friendcode="poi"/>
   </wiring>
   <contents src="index.html"/>
   <rendering height="8" width="30"/>
