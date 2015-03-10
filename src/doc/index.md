@@ -22,7 +22,8 @@ Latest version of this widget is always [provided in FIWARE lab](https://store.l
 
 ### Output Endpoints
 
-**None**
+- **CrowdDetector Fluidity Output** - Type :: `JSON (in String)`. Send the fluidity data of all the Region Of Interest drawed periodically if there are changes to a Google Graph widget that is installed in with the [ChartsStarterKit](https://store.lab.fiware.org/offering/CoNWeT/ChartsStarterKit/1.0)
+- **CrowdDetector Occupancy Output** - Type :: `JSON (in String)`. Send the occupancy data of all the Region Of Interest drawed periodically if there are changes to a Google Graph widget that is installed in with the [ChartsStarterKit](https://store.lab.fiware.org/offering/CoNWeT/ChartsStarterKit/1.0)
 
 ## Usage
 
@@ -30,11 +31,11 @@ Latest version of this widget is always [provided in FIWARE lab](https://store.l
 
 You have to uncheck the **User Camera** setting and set in the **File Path** setting the video you want.
 
-The video path can be a remote video (`http://...`) or a video in the server in absolute path (`file:///....`) or relative.
+The video path can be a remote video (`http://...`) or a video name available on the server (See [service documentation](https://github.com/wirecloud-fiware/kurento-example-services/tree/develop/kurento-crowddetector) for more details about how to load video).
 
 ### Set polygons to detect.
 
-When you have a video (or local webcam) loaded, the mode will be setted to "Editing" and will be green.
+When you have a video (or local webcam) loaded, the mode will be setted to `Editing` and will be green.
 
 Once you can edit, when you click you will set a vertex and will add an edge with the previous vertex (if exists).
 

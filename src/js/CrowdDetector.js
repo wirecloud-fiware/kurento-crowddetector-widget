@@ -3,6 +3,33 @@
 var CrowdDetector = (function () {
     "use strict";
 
+    // attach the .equals method to Array's prototype to call it on any array
+    Array.prototype.equals = function (array) {
+        // if the other array is a falsy value, return
+        if (!array) {
+            return false;
+        }
+
+        // compare lengths - can save a lot of time
+        if (this.length != array.length) {
+            return false;
+        }
+
+        for (var i = 0, l = this.length; i < l; i++) {
+            // Check if we have nested arrays
+            if (this[i] instanceof Array && array[i] instanceof Array) {
+                // recurse into the nested arrays
+                if (!this[i].equals(array[i])) {
+                    return false;
+                }
+            } else if (this[i] != array[i]) {
+                // Warning - two different object instances will never be equal: {x:20} != {x:20}
+                return false;
+            }
+        }
+        return true;
+    };
+
     /*********************************************************
      ************************CONSTANTS*************************
      *********************************************************/
@@ -42,6 +69,8 @@ var CrowdDetector = (function () {
 
     var getClickPosition;
 
+    var occupancy, fluidity, o_occupancy, o_fluidity, oc_last_8, fl_last_8, oc_send, fl_send;
+
     /********************************************************/
     /**********************CONSTRUCTOR***********************/
     /********************************************************/
@@ -64,6 +93,15 @@ var CrowdDetector = (function () {
         actual = 0;
         actions = [];
         redos = [];
+
+        occupancy = [];
+        fluidity = [];
+        o_occupancy = [];
+        o_fluidity = [];
+        oc_last_8 = [];
+        fl_last_8 = [];
+        fl_send = false;
+        oc_send = false;
 
         timer = 0;
 
@@ -134,6 +172,8 @@ var CrowdDetector = (function () {
             });
         }
 
+        window.setInterval(send_all_wiring, 1000);
+
         // // Connect to server url
         // url = "ws://localhost:8082/crowddetector";
         connect_all(url);
@@ -193,6 +233,10 @@ var CrowdDetector = (function () {
                 wss[i].close();
             }
         };
+    };
+
+    var send_wiring = function send_wiring (name, data) {
+        MashupPlatform.wiring.pushEvent(name, JSON.stringify(data));
     };
 
     var setWebSocketVideoEvents = function setWebSocketVideoEvents () {
@@ -341,6 +385,11 @@ var CrowdDetector = (function () {
     };
 
     clearDots = function clearDots () {
+        occupancy = [];
+        fluidity = [];
+        oc_send = false;
+        fl_send = false;
+
         count = [0];
         points = [[]];
         actual = 0;
@@ -389,6 +438,51 @@ var CrowdDetector = (function () {
         redraw();
     };
 
+    var create_chart_json = function create_chart_json (name, value) {
+        var json = {
+            'type': 'Gauge',
+            'options': {
+                'width': '100%',
+                'height': '100%',
+                'redFrom': '90',
+                'redTo': '100',
+                'yellowFrom': '75',
+                'yellowTo': '90',
+                'minorTicks': '5'
+            },
+            'data': [
+                ['Label', 'Value']
+            ]
+        };
+        var n_v = 0;  //Math.round(value * 10000) / 10000;
+        for (var i = 0; i < value.length; i++) {
+            n_v = Math.round(value[i] * 10000) / 10000;
+            json.data.push([i.toString(), n_v]);
+        }
+        return json;
+    };
+
+    var send_all_wiring = function () {
+        if (!fl_send || !fluidity.equals(o_fluidity)) {
+            send_wiring('crowd_fluidity', create_chart_json('', fluidity));
+            o_fluidity = fluidity.slice(0);
+            fl_send = true;
+        }
+        if (!oc_send || !occupancy.equals(o_occupancy)) {
+            send_wiring('crowd_occupancy', create_chart_json('', occupancy));
+            o_occupancy = occupancy.slice(0);
+            oc_send = true;
+        }
+
+    };
+
+    // var add_max = function(arr, v, m) {
+    //     if (arr.length() >= m) {
+    //         arr.shift();
+    //     }
+    //     arr.push(v.slice(0));
+    // };
+
     crowdDetectorDirection = function crowdDetectorDirection(message) {
         window.console.log ("Direction event received in roi " + message.event_data.roiID +
                             " with direction " + message.event_data.directionAngle);
@@ -398,12 +492,22 @@ var CrowdDetector = (function () {
         window.console.log ("Fluidity event received in roi " + message.event_data.roiID +
                             ". Fluidity level " + message.event_data.fluidityPercentage +
                             " and fluidity percentage " + message.event_data.fluidityLevel);
+        o_fluidity = fluidity.slice(0);
+        var i = Number(message.event_data.roiID.replace('roi', ''));
+        var val = message.event_data.fluidityPercentage;
+        fluidity[i - 1] = (fl_send || val === 0) ? val : (val + fluidity[i - 1]) / 2;
+        fl_send = false;
     };
 
     crowdDetectorOccupancy = function crowdDetectorOccupancy(message) {
         window.console.log ("Occupancy event received in roi " + message.event_data.roiID +
                             ". Occupancy level " + message.event_data.occupancyPercentage +
                             " and occupancy percentage " + message.event_data.occupancyLevel);
+        o_occupancy = occupancy.slice(0);
+        var i = Number(message.event_data.roiID.replace('roi', ''));
+        var val =  message.event_data.occupancyPercentage;
+        occupancy[i - 1] = (oc_send || val === 0) ? val : (val + occupancy[i - 1]) / 2;
+        oc_send = false;
     };
 
     var hidePath = function hidePath () {
@@ -816,6 +920,11 @@ var CrowdDetector = (function () {
             count.push(0);
             actual += 1;
 
+            occupancy.push(0);
+            fluidity.push(0);
+            // oc_last_8.push([]);
+            // fl_last_8.push([]);
+
             window.clearTimeout(timer);
             timer = window.setTimeout(stop_edit, 5000);
         }
@@ -933,6 +1042,10 @@ var CrowdDetector = (function () {
             reconnect_until_end(x, "open");
             points.pop();
             count.pop();
+
+            occupancy.pop();
+            fluidity.pop();
+
             actual = x;
         };
         if (!can_edit) {

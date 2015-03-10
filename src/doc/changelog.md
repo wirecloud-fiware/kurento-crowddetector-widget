@@ -1,3 +1,11 @@
+v 0.3.1
+==============
+
+### General
+
+- Added two endpoints that send data of the polygons to a Google Graph
+
+
 v 0.3.0
 ==============
 
