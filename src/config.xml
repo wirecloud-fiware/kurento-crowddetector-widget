@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="CoNWeT" name="crowddetector" version="0.2.48">
+<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="CoNWeT" name="crowddetector" version="0.3.1">
   <details>
     <title>Kurento Crowd Detector</title>
     <email>bgrana@conwet.com</email>
@@ -11,10 +11,15 @@
     <doc>doc/index.md</doc>
   </details>
   <preferences>
-    <preference name="server-url" label="Server URL" description="URL of crowd detector service" type="text" default="ws://130.206.81.33:8082/crowddetector" />
+    <preference name="server-url" label="Server URL" description="URL of crowd detector service" type="text" default="ws://130.206.81.33:8082/crowddetector"/>
+    <preference name="use-camera" label="Use Webcam or Video" description="Set if use webcam or remote video" type="boolean" default="true"/>
+    <preference name="file-path" label="Video path" description="File to load if video selected" type="text" default="videos/6.mp4"/>
   </preferences>
   <wiring>
     <inputendpoint name="activate_detection" type="text" label="Activates crowd detection" description="Start crowd detection" friendcode="poi"/>
+    <!-- <outputendpoint name="crowd_direction" type="text" label="CrowdDetector Direction Output" description="Data for Google Chart of Direction" friendcode="cdo"/> -->
+    <outputendpoint name="crowd_fluidity" type="text" label="CrowdDetector Fluidity Output" description="Data for Google Chart of Fluidity" friendcode="cfo"/>
+    <outputendpoint name="crowd_occupancy" type="text" label="CrowdDetector Occupancy Output" description="Data for Google Chart of Occupancy" friendcode="coo"/>
   </wiring>
   <contents src="index.html"/>
   <rendering height="8" width="30"/>

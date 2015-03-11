@@ -7,3 +7,4 @@ src/lib/
 build/
 _SpecRunner.html
 .grunt/
+src/js/.tern-port
