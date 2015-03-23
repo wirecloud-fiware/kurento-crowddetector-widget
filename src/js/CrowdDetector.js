@@ -161,10 +161,10 @@ var CrowdDetector = (function () {
         if (MashupPlatform) {
             loadPreferences();
 
-            // Register wiring callback
-            MashupPlatform.wiring.registerCallback('activate_detection', function (data) {
-                loadVideo();
-            });
+            //
+            // MashupPlatform.wiring.registerCallback('activate_detection', function (data) {
+            //     loadVideo();
+            // });
 
             // Register preference callback
             MashupPlatform.prefs.registerCallback(function () {
@@ -285,7 +285,7 @@ var CrowdDetector = (function () {
 
         wss[WS].onmessage = function (message) {
             var parsedMessage = JSON.parse(message.data);
-            MashupPlatform.widget.log('Received message: ' + message.data, MashupPlatform.log.INFO);
+            // MashupPlatform.widget.log('Received message: ' + message.data, MashupPlatform.log.INFO);
 
             switch (parsedMessage.id) {
             case 'startResponse':
@@ -473,7 +473,6 @@ var CrowdDetector = (function () {
             o_occupancy = occupancy.slice(0);
             oc_send = true;
         }
-
     };
 
     // var add_max = function(arr, v, m) {
@@ -579,7 +578,7 @@ var CrowdDetector = (function () {
     };
 
     var startVideo = function startVideo(message) {
-        if (message.response !== 'accepted') {
+        if (!message.accepted) {
             onError("Can't load the video. Reason: " + message.message);
             if (webRtcVideo) {
                 webRtcVideo.dispose();

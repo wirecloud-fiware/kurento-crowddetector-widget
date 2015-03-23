@@ -1,85 +1,213 @@
-/*global $, beforeEach, beforeAll, describe, it, expect, affix, MashupPlatform, CrowdDetector*/
+/*global $, beforeEach, beforeAll, describe, it, expect, affix, MashupPlatform, CrowdDetector, kurentoUtils*/
 
-describe("Test CrowdDetector widget", function () {
+
+(function () {
     "use strict";
-    var widget, values, prefsGetValues, contextGetValues;
 
-    beforeAll(function () {
-        // Remove the previous canvas
-        $("#myCanvas").remove();
-    });
+    // jasmine.getFixtures().fixturesPath = 'src/test/fixtures/';
 
-    beforeEach(function () {
-        prefsGetValues = {
-            'server-url': 'ws://url1',
-            'use-camera': true,
-            'file-path': 'notExist.mp4'
-        };
+    var dependencyList = [
+        'script',
+        'div#jasmine-fixtures',
+        'div.jasmine_html-reporter'
+    ];
 
-        contextGetValues = {
-            'username': 'user1'
-        };
+    var widget;
 
-        values = {
-            "MashupPlatform.context.get": contextGetValues,
-            "MashupPlatform.prefs.get": prefsGetValues
-        };
+    var print = function print(x) {
+        window.console.log(x);
+    };
 
-        MashupPlatform.setStrategy(new MyStrategy(), values);
+    var canvasInit = function(x, y) {
+        if (typeof(x) === 'undefined')
+            x = 640;
+        if (typeof(y) === 'undefined')
+            y = 480;
 
-        // affix("#myCanvas");
+        widget.setCanvas({clientHeight: y, clientWidth: x }); // 640x480 size
+    };
 
-        widget = new CrowdDetector();
-    });
+    var clickInit = function (x, y, ofx, ofy) {
+        if (typeof(ofx) === 'undefined')
+            ofx = 300;
+        if (typeof(ofy) === 'undefined')
+            ofy = 100;
 
-    // it("canvas exists in DOM", function () {
-    //     expect($("#myCanvas")).toBeInDOM();
-    //     expect($("#myCanvas")).toBeEmpty();
-    // });
-
-    // it("canvas can be appended", function () {
-    //     var canv = $("#myCanvas");
-    //     expect(canv).toBeInDOM();
-    //     expect(canv).toBeEmpty();
-    //     $('<div id="notempty"></div>').appendTo(canv);
-    //     expect(canv).not.toBeEmpty();
-    // });
-
-    // it("canvas reset every test", function () {
-    //     var test = $("#myCanvas");
-    //     expect(test).toBeInDOM();
-    //     expect(test).toBeEmpty();
-    // });
-
-
-    it("load the given preferences correctly", function () {
-	expect(widget.getUrl()).toBe(prefsGetValues['server-url']);
-
-	prefsGetValues['server-url'] = 'ws://url2';
-
-	widget.loadPreferences();
-
-	expect(widget.getUrl()).toBe(prefsGetValues['server-url']);
-    });
-
-    it("test", function () {
-        values = {
-            "MashupPlatform.context.get": contextGetValues,
-            "MashupPlatform.prefs.get": prefsGetValues
-        };
-        MashupPlatform.setStrategy(new MyStrategy(), values);
-
-        widget.setCanvas({clientHeight: 322, clientWidth: 572 });
-
-        var t = {clientX: 497, clientY: 110, currentTarget: {
-            offsetLeft: 389, offsetTop: 51, scrollLeft: 0,
+        return {clientX: x, clientY: y, currentTarget: { // The center
+            offsetLeft: ofx, offsetTop: ofy, scrollLeft: 0, // The offset of the video
             scrollTop: 0, clientLeft: 0, clientTop: 0
         }};
+    };
 
-        var t2 = widget.getClickPosition(t);
 
-        // window.console.log(widget.getPercentage(t2).x);
-        // window.console.log(t2.x);
-        // window.console.log(t2.y);
+    describe("Test CrowdDetector click", function () {
+        beforeAll(function () {
+            // Remove the previous canvas
+            $("#myCanvas").remove();
+        });
+
+        beforeEach(function () {
+            widget = new CrowdDetector();
+        });
+
+
+        it("click in the center without offset", function () {
+            canvasInit();
+            var t = clickInit(320, 240, 0, 0);
+
+            var percs = widget.getPercentage(widget.getClickPosition(t));
+
+            expect(percs.x).toEqual(50);
+            expect(percs.y).toEqual(50);
+        });
+
+        it("click in the center with offset", function () {
+            canvasInit();
+            var t = clickInit(620, 340);
+
+            var percs = widget.getPercentage(widget.getClickPosition(t));
+
+            expect(percs.x).toEqual(50);
+            expect(percs.y).toEqual(50);
+        });
+
+        it("click in the border left", function () {
+            canvasInit();
+            var t = clickInit(0, 240, 0, 0);
+
+            var t2 = widget.getClickPosition(t);
+            var percs = widget.getPercentage(t2);
+
+            expect(percs.x).toEqual(0);
+            expect(percs.y).toEqual(50);
+        });
+
+        it("click out the left border", function () {
+            canvasInit();
+            var t = clickInit(0, 240, 10, 0); // set an x offset to be "out" the border
+
+            var t2 = widget.getClickPosition(t);
+            var percs = widget.getPercentage(t2);
+
+            expect(percs.x).toBeLessThan(0);
+            expect(percs.y).toEqual(50);
+        });
+
+        it("click in the border right ", function () {
+            canvasInit();
+            var t = clickInit(640, 240, 0, 0);
+
+            var t2 = widget.getClickPosition(t);
+            var percs = widget.getPercentage(t2);
+
+            expect(percs.x).toEqual(100);
+            expect(percs.y).toEqual(50);
+        });
+
+        it("click out the border right ", function () {
+            canvasInit();
+            var t = clickInit(640.1, 240, 0, 0); // So little difference
+
+            var t2 = widget.getClickPosition(t);
+            var percs = widget.getPercentage(t2);
+
+            expect(percs.x).toBeGreaterThan(100);
+            expect(percs.y).toEqual(50);
+        });
+
+        it("click in the border top", function () {
+            canvasInit();
+            var t = clickInit(320, 0, 0, 0);
+
+            var t2 = widget.getClickPosition(t);
+            var percs = widget.getPercentage(t2);
+
+            expect(percs.x).toEqual(50);
+            expect(percs.y).toEqual(0);
+        });
+
+        it("click out the left top", function () {
+            canvasInit();
+            var t = clickInit(320, 0, 0, 0.1); // set a minimum y offset to be "out" the border
+            var t2 = widget.getClickPosition(t);
+            var percs = widget.getPercentage(t2);
+
+            expect(percs.x).toEqual(50);
+            expect(percs.y).toBeLessThan(0);
+        });
+
+        it("click in the border bottom", function () {
+            canvasInit();
+            var t = clickInit(320, 480, 0, 0);
+
+            var t2 = widget.getClickPosition(t);
+            var percs = widget.getPercentage(t2);
+
+            expect(percs.x).toEqual(50);
+            expect(percs.y).toEqual(100);
+        });
+
+        it("click out the border bottom", function () {
+            canvasInit();
+            var t = clickInit(320, 480.1, 0, 0); // So little difference
+
+            var t2 = widget.getClickPosition(t);
+            var percs = widget.getPercentage(t2);
+
+            expect(percs.x).toEqual(50);
+            expect(percs.y).toBeGreaterThan(100);
+        });
     });
-});
+
+    describe("Test CrowdDetector widget", function () {
+        var widget, values, prefsGetValues, contextGetValues;
+
+
+        beforeAll(function () {
+            // Remove the previous canvas
+            $("#myCanvas").remove();
+        });
+
+        beforeEach(function () {
+
+            prefsGetValues = {
+                'server-url': 'ws://kurento.example.com',
+                'use-camera': true,
+                'file-path': 'notExist.mp4'
+            };
+
+            contextGetValues = {
+                'username': ''
+            };
+
+            values = {
+                "MashupPlatform.context.get": contextGetValues,
+                "MashupPlatform.prefs.get": prefsGetValues
+            };
+
+            MashupPlatform.prefs.registerCallback.calls.reset();
+            MashupPlatform.wiring.registerCallback.calls.reset();
+            kurentoUtils.withErrors = false;
+
+            MashupPlatform.setStrategy(new MyStrategy(), values);
+
+            // affix("#myCanvas");
+
+            widget = new CrowdDetector();
+        });
+
+        it("load the given preferences correctly", function (done) {
+	    expect(widget.getUrl()).toBe(prefsGetValues['server-url']);
+
+	    prefsGetValues['server-url'] = 'ws://kurento2.example.com';
+
+	    widget.loadPreferences();
+
+	    expect(widget.getUrl()).toBe(prefsGetValues['server-url']);
+            done();
+            // window.setTimeout(function() {
+            //     done();
+            // }, 1000);
+        });
+    });
+})();
