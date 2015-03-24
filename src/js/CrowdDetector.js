@@ -1118,12 +1118,22 @@ var CrowdDetector = (function () {
         return url;
     };
 
+    var getUseCamera = function () {
+        return camera;
+    };
+
+    var getFilePath = function () {
+        return file_path;
+    };
+
     var setCanvas = function (e) {
         canvas = e;
     };
 
     CrowdDetector.prototype = {
         'getUrl': getUrl,
+        'getUseCamera': getUseCamera,
+        'getFilePath': getFilePath,
         'loadPreferences': loadPreferences,
         'getClickPosition': getClickPosition,
         'getPercentage': getPercentage,
