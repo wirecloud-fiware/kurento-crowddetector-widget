@@ -40,8 +40,6 @@ var CrowdDetector = (function () {
     var ADD = "Add",
         MOVE = "Move",
         FINISH = "Finish";
-    var WS = 0,
-        WSV = 1;
 
     var dot_endp = {
         endpoint: "Dot",
@@ -112,7 +110,7 @@ var CrowdDetector = (function () {
         url = null;
         camera = null;
         file_path = null;
-        wss = [null, null];
+        wss = null;
         videoInput = document.getElementById('videoInput');
         videoOutput = document.getElementById('videoOutput');
         prevDetection = false;
@@ -214,23 +212,24 @@ var CrowdDetector = (function () {
         }
     };
 
-    var connect_all = function (url) {
-        connect(url, WS, setWebSocketEvents);
-        if (!camera) {
-            connect(url, WSV, setWebSocketVideoEvents);
+    var connect_all = function (url, c) {
+        if (camera) {
+            connect(url, setWebSocketEvents);
+        } else {
+            connect(url, setWebSocketVideoEvents);
         }
     };
 
-    connect = function connect (url, i, events) {
-        if (wss[i] !== null) {
-            wss[i].close();
+    connect = function connect(url, events) {
+        if (wss !== null) {
+            wss.close();
         }
 
-        wss[i] = new WebSocket(url);
+        wss = new WebSocket(url);
         events();
         window.onbeforeunload = function () {
-            if (wss[i] !== null) {
-                wss[i].close();
+            if (wss !== null) {
+                wss.close();
             }
         };
     };
@@ -240,10 +239,10 @@ var CrowdDetector = (function () {
     };
 
     var setWebSocketVideoEvents = function setWebSocketVideoEvents () {
-        wss[WSV].onopen = function () {
+        wss.onopen = function () {
             loadVideo();
         };
-        wss[WSV].onmessage = function (message) {
+        wss.onmessage = function (message) {
             var parsedMessage = JSON.parse(message.data);
             switch (parsedMessage.id) {
             case 'getVideo':
@@ -272,18 +271,19 @@ var CrowdDetector = (function () {
             }
         };
 
-        wss[WSV].onerror = function () {
+        wss.onerror = function () {
             onError("Error creating websocket");
         };
     };
 
+
     setWebSocketEvents = function setWebSocketEvents () {
-        wss[WS].onopen = function () {
+        wss.onopen = function () {
             MashupPlatform.widget.log("WebSocket connected.", MashupPlatform.log.INFO);
             loadVideo();
         };
 
-        wss[WS].onmessage = function (message) {
+        wss.onmessage = function (message) {
             var parsedMessage = JSON.parse(message.data);
             // MashupPlatform.widget.log('Received message: ' + message.data, MashupPlatform.log.INFO);
 
@@ -313,8 +313,7 @@ var CrowdDetector = (function () {
                 onError('Unrecognized message', parsedMessage);
             }
         };
-
-        wss[WS].onerror = function () {
+        wss.onerror = function () {
             onError("Error creating WebSocket");
         };
     };
@@ -339,7 +338,7 @@ var CrowdDetector = (function () {
                     filter: false,
                     dots: []
                 };
-                sendMessage(message, WSV);
+                sendMessage(message);
             }, onError);
         }
     };
@@ -378,10 +377,10 @@ var CrowdDetector = (function () {
             });
     };
 
-    sendMessage = function sendMessage (message, i) {
+    sendMessage = function sendMessage (message) {
         var jsonMessage = JSON.stringify(message);
         window.console.log('Sending message: ' + jsonMessage);
-        wss[i].send(jsonMessage);
+        wss.send(jsonMessage);
     };
 
     clearDots = function clearDots () {
@@ -531,7 +530,7 @@ var CrowdDetector = (function () {
                 filter: true,
                 dots: prepare_points_server()
             };
-            sendMessage(message, WSV);
+            sendMessage(message);
         }, onError);
     };
 
@@ -554,7 +553,7 @@ var CrowdDetector = (function () {
             var message = {
                 id: 'stop'
             };
-            sendMessage(message, WS);
+            sendMessage(message);
         }
     };
 
@@ -567,7 +566,7 @@ var CrowdDetector = (function () {
             var message = {
                 id: 'stop'
             };
-            sendMessage(message, WSV);
+            sendMessage(message);
         }
     };
 
@@ -637,7 +636,7 @@ var CrowdDetector = (function () {
             sdpOffer: offerSdp,
             dots: prepare_points_server()
         };
-        sendMessage(message, WS);
+        sendMessage(message);
     };
 
     onError = function onError (error) {
