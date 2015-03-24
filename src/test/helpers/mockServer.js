@@ -1,10 +1,9 @@
 (function () {
-
     "use strict";
+
     window.mockServer2 = new MockServer('ws://kurento2.example.com');
     window.mockServer = new MockServer('ws://kurento.example.com');
     window.mockServer.on('connection', function (server) {
-
         server.on('message', function (event) {
             var data = JSON.parse(event.data);
 
@@ -28,6 +27,10 @@
                 }
                 break;
             case "start":
+                window.console.log("start");
+                break;
+            case "stop":
+                window.console.log("stop");
                 break;
             default:
             }

@@ -4,7 +4,10 @@
 (function () {
     "use strict";
 
-    // jasmine.getFixtures().fixturesPath = 'src/test/fixtures/';
+    var widget;
+    var olog = window.console.log;
+
+    jasmine.getFixtures().fixturesPath = 'src/test/fixtures/';
 
     var dependencyList = [
         'script',
@@ -12,10 +15,31 @@
         'div.jasmine_html-reporter'
     ];
 
-    var widget;
+    var clearDocument = function clearDocument() {
+        $('body > *:not(' + dependencyList.join(', ') + ')').remove();
+    };
+
+    var getWiringCallback = function getWiringCallback(endpoint) {
+        var calls = MashupPlatform.wiring.registerCallback.calls;
+        var count = calls.count();
+        for (var i = count - 1; i >= 0; i--) {
+            var args = calls.argsFor(i);
+            if (args[0] === endpoint) {
+                return args[1];
+            }
+        }
+        return null;
+    };
 
     var print = function print(x) {
         window.console.log(x);
+    };
+
+    var proxylog = function () {
+        window.console.log = function () {};
+    };
+    var restorelog = function () {
+        window.console.log = olog;
     };
 
     var canvasInit = function(x, y) {
@@ -162,6 +186,7 @@
     describe("Test CrowdDetector widget", function () {
         var widget, values, prefsGetValues, contextGetValues;
 
+        var async_interval = null;
 
         beforeAll(function () {
             // Remove the previous canvas
@@ -185,6 +210,7 @@
                 "MashupPlatform.prefs.get": prefsGetValues
             };
 
+            loadFixtures('index.html');
             MashupPlatform.prefs.registerCallback.calls.reset();
             MashupPlatform.wiring.registerCallback.calls.reset();
             kurentoUtils.withErrors = false;
@@ -196,18 +222,75 @@
             widget = new CrowdDetector();
         });
 
-        it("load the given preferences correctly", function (done) {
+        afterEach(function () {
+            restorelog(); // Restore the log function
+            clearDocument();
+            if (async_interval != null) {
+                clearInterval(async_interval);
+                async_interval = null;
+            }
+        });
+
+        it("registered preferences callback", function () {
+            expect(MashupPlatform.prefs.registerCallback).toHaveBeenCalledWith(jasmine.any(Function));
+        });
+
+        it("load the initial preferences correctly", function () {
 	    expect(widget.getUrl()).toBe(prefsGetValues['server-url']);
+            expect(widget.getUseCamera()).toBe(prefsGetValues['use-camera']);
+            expect(widget.getFilePath()).toBe(prefsGetValues['file-path']);
+        });
 
-	    prefsGetValues['server-url'] = 'ws://kurento2.example.com';
+        it("change the url preference", function () {
+            prefsGetValues['server-url'] = 'ws://kurento2.example.com';
+            expect(prefsGetValues['server-url']).toBe('ws://kurento2.example.com');
 
-	    widget.loadPreferences();
+            widget.loadPreferences();
 
-	    expect(widget.getUrl()).toBe(prefsGetValues['server-url']);
-            done();
-            // window.setTimeout(function() {
-            //     done();
-            // }, 1000);
+            expect(widget.getUrl()).toBe(prefsGetValues['server-url']);
+        });
+
+        it("change the file path preference", function () {
+            prefsGetValues['file-path'] = 'videos/otherFile.mp4';
+            expect(prefsGetValues['file-path']).toBe('videos/otherFile.mp4');
+
+            widget.loadPreferences();
+
+            expect(widget.getFilePath()).toBe(prefsGetValues['file-path']);
+        });
+
+        it("change the 'use camera' preference", function () {
+            proxylog(); // Prevent logs
+            prefsGetValues['use-camera'] = false;
+            expect(prefsGetValues['use-camera']).toBe(false);
+
+            widget.loadPreferences();
+
+            expect(widget.getUseCamera()).toBe(prefsGetValues['use-camera']);
+        });
+
+        it("Try get a video that don't exist", function(done) {
+            proxylog(); // Prevent logs
+            prefsGetValues['use-camera'] = false;
+            expect(widget.getState()).toEqual(0); // Can start
+            widget.loadPreferences();
+            setTimeout(function() {
+                expect(widget.getState()).toEqual(0); // Can start
+                done();
+            }, 200);
+        });
+
+        it("Try get a video that exist", function(done) {
+            proxylog(); // Prevent logs
+
+            prefsGetValues['use-camera'] = false;
+            prefsGetValues['file-path'] = 'videos/exist.mp4';
+            expect(widget.getState()).toEqual(0); // Can start
+            widget.loadPreferences();
+            setTimeout(function() {
+                expect(widget.getState()).toEqual(3); // With video
+                done();
+            }, 200);
         });
     });
 })();

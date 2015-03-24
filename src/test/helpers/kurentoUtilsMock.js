@@ -8,8 +8,7 @@ window.kurentoUtils = (function () {
 
         withErrors: false,
 
-        WebRtcPeer: jasmine.createSpyObj('WebRtcPeer', ['startSendRecv'])
-
+        WebRtcPeer: jasmine.createSpyObj('WebRtcPeer', ['startSendRecv', 'startRecvOnly'])
     };
 
     kurentoUtils.WebRtcPeer.startSendRecv.and.callFake(function () {
@@ -19,6 +18,15 @@ window.kurentoUtils = (function () {
             arguments[2]('offerSdp', kurentoUtils.connection);
         }
 
+        return kurentoUtils.connection;
+    });
+
+    kurentoUtils.WebRtcPeer.startRecvOnly.and.callFake(function () {
+        if (kurentoUtils.withErrors) {
+            arguments[2]('error');
+        } else {
+            arguments[1]('offerSdp');
+        }
         return kurentoUtils.connection;
     });
 

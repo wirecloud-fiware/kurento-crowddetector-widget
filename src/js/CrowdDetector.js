@@ -36,7 +36,8 @@ var CrowdDetector = (function () {
 
     var I_CAN_START = 0,
         I_CAN_STOP = 1,
-        I_AM_STARTING = 2;
+        I_AM_STARTING = 2,
+        I_AM_WITH_VIDEO = 3;
     var ADD = "Add",
         MOVE = "Move",
         FINISH = "Finish";
@@ -132,7 +133,7 @@ var CrowdDetector = (function () {
                 }
                 window.setTimeout(function () {
                     recalculate();
-                    if (state === I_CAN_START) {
+                    if (state === I_CAN_START || state === I_AM_WITH_VIDEO) {
                         start_edit();
                     }
                 }, 2000);
@@ -520,7 +521,7 @@ var CrowdDetector = (function () {
         window.console.log("Starting remote video detecting");
         setState(I_AM_STARTING);
 
-        stop_v();
+        stop();
         hidePath();
         webRtcVideo = kurentoUtils.WebRtcPeer.startRecvOnly(videoInput, function (offerSdp) {
             var message = {
@@ -545,7 +546,7 @@ var CrowdDetector = (function () {
     };
 
     stop = function stop() {
-        window.console.log("Stopping video call ...");
+        window.console.log("Stopping video streaming ...");
         setState(I_CAN_START);
         if (webRtcPeer) {
             webRtcPeer.dispose();
@@ -557,23 +558,9 @@ var CrowdDetector = (function () {
         }
     };
 
-    var stop_v = function stop_v() {
-        window.console.log("Stopping Video Streaming");
-        setState(I_CAN_START);
-        if (webRtcVideo) {
-            webRtcVideo.dispose();
-            webRtcVideo = null;
-            var message = {
-                id: 'stop'
-            };
-            sendMessage(message);
-        }
-    };
-
     var stop_all = function stop_all() {
         hideSpinner(videoInput, videoOutput);
         stop();
-        stop_v();
     };
 
     var startVideo = function startVideo(message) {
@@ -588,6 +575,9 @@ var CrowdDetector = (function () {
             window.console.log("Video received from server. Processing...");
             if (message.filter) {
                 setState(I_CAN_STOP);
+                setIntervalX(recalculate, 500, 12);
+            } else {
+                setState(I_AM_WITH_VIDEO);
                 setIntervalX(recalculate, 500, 12);
             }
             webRtcVideo.processSdpAnswer(message.sdpAnswer); // If WebRtcEndpoint
@@ -610,6 +600,7 @@ var CrowdDetector = (function () {
 
     setState = function setState (nextState) {
         switch (nextState) {
+        case I_AM_WITH_VIDEO:
         case I_CAN_START:
             $('#start').attr('disabled', false);
             $('#stop').attr('disabled', true);
@@ -1125,6 +1116,10 @@ var CrowdDetector = (function () {
         return file_path;
     };
 
+    var getState = function () {
+        return state;
+    };
+
     var setCanvas = function (e) {
         canvas = e;
     };
@@ -1133,6 +1128,7 @@ var CrowdDetector = (function () {
         'getUrl': getUrl,
         'getUseCamera': getUseCamera,
         'getFilePath': getFilePath,
+        'getState': getState,
         'loadPreferences': loadPreferences,
         'getClickPosition': getClickPosition,
         'getPercentage': getPercentage,

@@ -154,10 +154,9 @@ module.exports = function (grunt) {
                     helpers: ['src/test/helpers/*.js'],
                     vendor: ['bower_components/jquery/dist/jquery.js',
                              'bower_components/adapter.js/src/adapter.js',
-                             'bower_components/kurento-utils/js/kurento-utils.js',
                              'bower_components/bootstrap/dist/js/bootstrap.js',
+                             'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
                              'bower_components/mock-socket/dist/mock-socket.js',
-                             'bower_components/jsPlumb/dist/js/dom.jsPlumb-1.7.2.js',
                              'src/test/vendor/*.js']
                 }
             },
@@ -184,12 +183,12 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-bower-task');
     grunt.loadNpmTasks('grunt-contrib-compress');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.loadNpmTasks('grunt-strip-code');
     grunt.loadNpmTasks('grunt-jscs');
+    grunt.loadNpmTasks('grunt-strip-code');
     grunt.loadNpmTasks('grunt-text-replace');
 
     grunt.registerTask('zip', 'compress:widget');
