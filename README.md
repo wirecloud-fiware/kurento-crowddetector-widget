@@ -1,4 +1,4 @@
-Kurento One2One widget
+Kurento CrowdDetector widget
 ======================
 
 The kurento CrowdDetector widget is a WireCloud widget that provides an easy way for use a video and detect people in the areas selected in your dashboard.
