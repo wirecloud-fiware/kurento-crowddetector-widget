@@ -174,7 +174,6 @@ var CrowdDetector = (function () {
         window.setInterval(send_all_wiring, 1000);
 
         // // Connect to server url
-        // url = "ws://localhost:8082/crowddetector";
         connect_all(url);
     };
 

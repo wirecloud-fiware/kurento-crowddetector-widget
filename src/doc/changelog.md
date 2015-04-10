@@ -1,3 +1,11 @@
+v 0.3.2
+=============
+
+### General
+
+- Changed the server uri to the new [Scala Service](https://github.com/wirecloud-fiware/kurento-example-services-scala)
+
+
 v 0.3.1
 ==============
 

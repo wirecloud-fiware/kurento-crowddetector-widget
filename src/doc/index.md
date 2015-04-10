@@ -4,13 +4,13 @@ This [widget](https://github.com/wirecloud-fiware/kurento-crowddetector-widget/t
 
 This CrowdDetector widget need a server running as middleware between you and a kurento media server.
 
-The server is this [crowddetector service](https://github.com/wirecloud-fiware/kurento-example-services/tree/develop/kurento-crowddetector) provided by FiWare.
+The server is this [scala service](https://github.com/wirecloud-fiware/kurento-example-services-scala) provided by FiWare.
 
 Latest version of this widget is always [provided in FIWARE lab](https://store.lab.fiware.org/search/keyword/CrowdDetector) where you can make use of it on the [Mashup portal](https://mashup.lab.fiware.org/)
 
 ## Settings
 
-- **Server URL** - URL of the crowddetector server. - Default: `ws://130.206.81.33:8082/crowddetector`
+- **Server URL** - URL of the crowddetector server. - Default:  `wss://wirecloudkurento.lab.fiware.org/crowddetector`
 - **User Camera** - If checked the widget will use the local webcam, if not will use a remote video. - Default: `true`
 - **File Path** - The remote URL or path in the server (absolute with file:// or relative) to load when **User Camera** is unchecked. - Default: `videos/6.mp4`
 
@@ -31,7 +31,8 @@ Latest version of this widget is always [provided in FIWARE lab](https://store.l
 
 You have to uncheck the **User Camera** setting and set in the **File Path** setting the video you want.
 
-The video path can be a remote video (`http://...`) or a video name available on the server (See [service documentation](https://github.com/wirecloud-fiware/kurento-example-services/tree/develop/kurento-crowddetector) for more details about how to load video).
+
+The video path can be a remote video (`http://...`) or a video name available on the server (See [service documentation](https://github.com/wirecloud-fiware/kurento-example-services-scala) for more details about how to load video).
 
 ### Set polygons to detect.
 
@@ -53,7 +54,7 @@ Once you've finish at least one polygon, you have to ways to send the polygons t
 ## Reference
 
 - [Widget Source Code](https://github.com/wirecloud-fiware/kurento-crowddetector-widget/tree/develop)
-- [Server Source Code](https://github.com/wirecloud-fiware/kurento-example-services/tree/develop/kurento-crowddetector)
+- [Server Source Code](https://github.com/wirecloud-fiware/kurento-example-services-scala)
 - [FIWARE Mashup](https://mashup.lab.fiware.org/)
 
 ## Copyright and License
