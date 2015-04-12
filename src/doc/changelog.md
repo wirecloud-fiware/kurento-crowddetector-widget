@@ -7,6 +7,7 @@ v 0.3.2
   implementation](https://github.com/wirecloud-fiware/kurento-example-services-scala)
   of the service
 - Updated the default server URL using https
+- New widget name: kurento-crowddetector. The previous widget name was: crowddetector.
 
 v 0.3.1
 ==============
