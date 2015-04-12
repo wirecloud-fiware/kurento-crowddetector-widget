@@ -2,11 +2,13 @@
 <widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="CoNWeT" name="kurento-crowddetector" version="0.3.2">
   <details>
     <title>Kurento Crowd Detector</title>
-    <email>mgarcia@conwet.com</email>
+    <email>wirecloud@conwet.com</email>
     <image>images/catalogue.png</image>
     <smartphoneimage>images/catalogueSmartphone.png</smartphoneimage>
     <description>A widget for selecting areas in a video tag</description>
-    <authors>mgarcia</authors>
+    <homepage>https://github.com/wirecloud-fiware/kurento-crowddetector-widget</homepage>
+    <issuetracker>https://github.com/wirecloud-fiware/kurento-crowddetector-widget/issues</issuetracker>
+    <authors>Miguel García Lafuente &lt;mgarcia@conwet.com&gt;</authors>
     <changelog>doc/changelog.md</changelog>
     <doc>doc/index.md</doc>
   </details>
