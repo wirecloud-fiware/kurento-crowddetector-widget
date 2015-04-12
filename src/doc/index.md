@@ -2,9 +2,12 @@
 
 This [widget](https://github.com/wirecloud-fiware/kurento-crowddetector-widget/tree/develop) provide an easy way for use a video and detect people in the areas selected in your dashboard.
 
-This CrowdDetector widget need a server running as middleware between you and a kurento media server.
-
-The server is this [scala service](https://github.com/wirecloud-fiware/kurento-example-services-scala) provided by FiWare.
+This CrowdDetector widget need a
+[service](https://github.com/wirecloud-fiware/kurento-example-services-scala)
+running as middleware between you and a kurento media server. You can find an
+instance of this service on FIWARE Lab
+(https://wirecloudkurento.lab.fiware.org/). This server is used by default, but
+you can deploy your own version and configure this widget for using it instead.
 
 Latest version of this widget is always [provided in FIWARE lab](https://store.lab.fiware.org/search/keyword/CrowdDetector) where you can make use of it on the [Mashup portal](https://mashup.lab.fiware.org/)
 

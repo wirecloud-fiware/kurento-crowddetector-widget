@@ -3,11 +3,14 @@ Kurento CrowdDetector widget
 
 The kurento CrowdDetector widget is a WireCloud widget that provides an easy way for use a video and detect people in the areas selected in your dashboard.
 
-This CrowdDetector widget need a server running as middleware between you and a kurento media server.
+This CrowdDetector widget need a
+[service](https://github.com/wirecloud-fiware/kurento-example-services-scala)
+running as middleware between you and a kurento media server. You can find an
+instance of this service on FIWARE Lab
+(https://wirecloudkurento.lab.fiware.org/). This server is used by default, but
+you can deploy your own version and configure this widget for using it instead.
 
-The server is this [scala service](https://github.com/wirecloud-fiware/kurento-example-services-scala) provided by FiWare.
-
-Latest version of this widget is always [provided in FIWARE lab](https://store.lab.fiware.org/search/keyword/CrowdDetector) where you can make use of it on the [Mashup portal](https://mashup.lab.fiware.org/)
+Latest version of this widget is always [provided in FIWARE lab](https://store.lab.fiware.org/search/keyword/KurentoStarterKit) where you can make use of it on the [Mashup portal](https://mashup.lab.fiware.org/)
 
 Build
 -----
@@ -53,7 +56,7 @@ If everything goes well, you will find a wgt file in the `dist` folder.
 
 - **Server URL** - URL of the crowddetector server. - Default: `wss://wirecloudkurento.lab.fiware.org/crowddetector`
 - **User Camera** - If checked the widget will use the local webcam, if not will use a remote video. - Default: `true`
-- **File Path** - The remote URL or path in the server (absolute with file:// or relative) to load when **User Camera** is unchecked. - Default: `videos/6.mp4`
+- **File Path** - The remote URL or a video file available on the server to load when **User Camera** is unchecked. - Default: `videos/6.mp4`
 
 ## Wiring
 
