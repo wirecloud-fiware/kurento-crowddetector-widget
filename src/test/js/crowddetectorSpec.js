@@ -57,10 +57,11 @@
         if (typeof(ofy) === 'undefined')
             ofy = 100;
 
-        return {clientX: x, clientY: y, currentTarget: { // The center
-            offsetLeft: ofx, offsetTop: ofy, scrollLeft: 0, // The offset of the video
-            scrollTop: 0, clientLeft: 0, clientTop: 0
-        }};
+        return {'target': {'id': 'myCanvas'},
+                clientX: x, clientY: y, currentTarget: { // The center
+                    offsetLeft: ofx, offsetTop: ofy, scrollLeft: 0, // The offset of the video
+                    scrollTop: 0, clientLeft: 0, clientTop: 0
+                }};
     };
 
 
@@ -183,6 +184,7 @@
         });
     });
 
+
     describe("Test CrowdDetector widget", function () {
         var widget, values, prefsGetValues, contextGetValues;
 
@@ -290,7 +292,179 @@
             setTimeout(function() {
                 expect(widget.getState()).toEqual(3); // With video
                 done();
-            }, 200);
+            }, 2200);
+        });
+    });
+
+    describe("Test events", function(){
+        var widget, values, prefsGetValues, contextGetValues;
+        var async_interval = null;
+        beforeAll(function () {
+            // Remove the previous canvas
+            $("#myCanvas").remove();
+        });
+        beforeEach(function () {
+
+            prefsGetValues = {
+                'server-url': 'ws://kurento.example.com',
+                'use-camera': true,
+                'file-path': 'notExist.mp4'
+            };
+
+            contextGetValues = {
+                'username': ''
+            };
+
+            values = {
+                "MashupPlatform.context.get": contextGetValues,
+                "MashupPlatform.prefs.get": prefsGetValues
+            };
+
+            loadFixtures('index.html');
+            MashupPlatform.prefs.registerCallback.calls.reset();
+            MashupPlatform.wiring.registerCallback.calls.reset();
+            kurentoUtils.withErrors = false;
+
+            MashupPlatform.setStrategy(new MyStrategy(), values);
+
+            // affix("#myCanvas");
+            widget = new CrowdDetector();
+            widget.reset(); // I don't know why but new don't create a new instance u.U
+        });
+
+        afterEach(function () {
+            widget.reset();
+            restorelog(); // Restore the log function
+            clearDocument();
+            if (async_interval != null) {
+                clearInterval(async_interval);
+                async_interval = null;
+            }
+        });
+
+        it("start and stop edit", function() {
+            proxylog();
+            expect(widget.getCanEdit()).toBeFalsy();
+            widget.handle_edit(); // start
+            expect(widget.getCanEdit()).toBeTruthy();
+            widget.handle_edit(); // stop edit
+            expect(widget.getCanEdit()).toBeTruthy(); // Still no points
+        });
+        it("don't let click if not editing", function(){
+            widget.handler();
+            expect($('.circle').length).toEqual(0);
+        });
+        it("can click and create a node if editting", function(){
+            // canvasInit();
+            widget.handle_edit(); // Start edit!
+            var t = clickInit(10, 10, 0, 0);
+            widget.handler(t);
+            expect($('.circle').length).toEqual(1);
+        });
+        it("other canvas id", function(){
+            // canvasInit();
+            widget.handle_edit(); // Start edit!
+            var t = clickInit(10, 10, 0, 0);
+            t.target.id = 'notexists';
+            widget.handler(t);
+            expect($('.circle').length).toEqual(0);
+        });
+        it("multiples clicks!", function(){
+            // canvasInit();
+            widget.handle_edit(); // Start edit!
+            var t = clickInit(10, 10, 0, 0);
+            widget.handler(t);
+            expect($('.circle').length).toEqual(1);
+
+            t = clickInit(20, 20, 0, 0);
+            widget.handler(t);
+            expect($('.circle').length).toEqual(2);
+
+            t = clickInit(30, 10, 0, 0);
+            widget.handler(t);
+            expect($('.circle').length).toEqual(3);
+        });
+        it("try finish with 2 nodes", function(){
+            // canvasInit();
+            widget.handle_edit(); // Start edit!
+            var t = clickInit(10, 10, 0, 0);
+            widget.handler(t);
+            t = clickInit(20, 20, 0, 0);
+            widget.handler(t);
+
+            t = clickInit(10, 10, 0, 0);
+            t.target.id = 'Dot0_0';
+            widget.handler(t);
+            expect(widget.getActual()).toBe(0);
+        });
+        it("finish clicking first", function(){
+            // canvasInit();
+            widget.handle_edit(); // Start edit!
+            var t = clickInit(10, 10, 0, 0);
+            widget.handler(t);
+            t = clickInit(20, 20, 0, 0);
+            widget.handler(t);
+            t = clickInit(30, 10, 0, 0);
+            widget.handler(t);
+
+            t = clickInit(10, 10, 0, 0);
+            t.target.id = 'Dot0_0';
+            widget.handler(t);
+            expect(widget.getActual()).toBe(1);
+        });
+
+        it("stop edit when can stop!", function(){
+            proxylog();
+            widget.handle_edit(); // Start edit!
+            var t = clickInit(10, 10, 0, 0);
+            widget.handler(t);
+            t = clickInit(20, 20, 0, 0);
+            widget.handler(t);
+            t = clickInit(30, 10, 0, 0);
+            widget.handler(t);
+
+            t = clickInit(10, 10, 0, 0);
+            t.target.id = 'Dot0_0';
+            widget.handler(t);
+            expect(widget.getActual()).toBe(1);
+
+            widget.handle_edit();
+        });
+    });
+
+    describe("Array equals", function () {
+        var widget;
+        beforeEach(function (){
+            widget = new CrowdDetector();
+            Array.prototype.equals = widget.arrayequals;
+        });
+        it("No second array is false", function(){
+            var a = [1, 2];
+            expect(a.equals()).toBeFalsy();
+        });
+        it("Distinct lengths is false", function () {
+            var a = [1];
+            expect(a.equals([1, 2])).toBeFalsy();
+        });
+        it("two simple distint should be false", function() {
+            var a = [1, 2];
+            var b = [1, 3];
+            expect(a.equals(b)).toBeFalsy();
+        });
+        it("two simple equals return true", function() {
+            var a = [1, 2];
+            var b = [1, 2];
+            expect(a.equals(b)).toBeTruthy();
+        });
+        it("Two complex arrays equals", function() {
+            var a = [1, 2, [3, 4]];
+            var b = [1, 2, [3, 4]];
+            expect(a.equals(b)).toBeTruthy();
+        });
+        it("Two complex arrays distintct", function() {
+            var a = [1, 2, [3, 4]];
+            var b = [1, 2, [3, 5]];
+            expect(a.equals(b)).toBeFalsy();
         });
     });
 })();

@@ -107,7 +107,6 @@ var CrowdDetector = (function () {
         redding = false;
         dragging = false;
         can_edit = false;
-
         url = null;
         camera = null;
         file_path = null;
@@ -522,6 +521,7 @@ var CrowdDetector = (function () {
 
         stop();
         hidePath();
+
         webRtcVideo = kurentoUtils.WebRtcPeer.startRecvOnly(videoInput, function (offerSdp) {
             var message = {
                 id: 'getVideo',
@@ -1103,6 +1103,10 @@ var CrowdDetector = (function () {
     };
 
     /* test-code */
+    var reset = function () {
+        webRtcVideo = null;
+    };
+
     var getUrl = function () {
         return url;
     };
@@ -1115,8 +1119,24 @@ var CrowdDetector = (function () {
         return file_path;
     };
 
+    var getVideoInput = function () {
+        return videoInput;
+    };
+
+    var getVideoOutput = function () {
+        return videoOutput;
+    };
+
     var getState = function () {
         return state;
+    };
+
+    var getCanEdit = function () {
+        return can_edit;
+    };
+
+    var getActual = function () {
+        return actual;
     };
 
     var setCanvas = function (e) {
@@ -1124,14 +1144,23 @@ var CrowdDetector = (function () {
     };
 
     CrowdDetector.prototype = {
+        'reset': reset,
         'getUrl': getUrl,
         'getUseCamera': getUseCamera,
         'getFilePath': getFilePath,
+        'getVideoInput': getVideoInput,
+        'getVideoOutput': getVideoOutput,
         'getState': getState,
+        'getCanEdit': getCanEdit,
+        'getActual': getActual,
         'loadPreferences': loadPreferences,
         'getClickPosition': getClickPosition,
         'getPercentage': getPercentage,
-        'setCanvas': setCanvas
+        'setCanvas': setCanvas,
+        'arrayequals': Array.prototype.equals,
+        'start_edit': start_edit,
+        'handle_edit': handle_edit,
+        'handler': handler
     };
     /* end-test-code */
 
