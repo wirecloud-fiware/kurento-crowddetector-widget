@@ -36,12 +36,11 @@ var CrowdDetector = (function () {
 
     var I_CAN_START = 0,
         I_CAN_STOP = 1,
-        I_AM_STARTING = 2;
+        I_AM_STARTING = 2,
+        I_AM_WITH_VIDEO = 3;
     var ADD = "Add",
         MOVE = "Move",
         FINISH = "Finish";
-    var WS = 0,
-        WSV = 1;
 
     var dot_endp = {
         endpoint: "Dot",
@@ -112,7 +111,7 @@ var CrowdDetector = (function () {
         url = null;
         camera = null;
         file_path = null;
-        wss = [null, null];
+        wss = null;
         videoInput = document.getElementById('videoInput');
         videoOutput = document.getElementById('videoOutput');
         prevDetection = false;
@@ -134,7 +133,7 @@ var CrowdDetector = (function () {
                 }
                 window.setTimeout(function () {
                     recalculate();
-                    if (state === I_CAN_START) {
+                    if (state === I_CAN_START || state === I_AM_WITH_VIDEO) {
                         start_edit();
                     }
                 }, 2000);
@@ -161,10 +160,10 @@ var CrowdDetector = (function () {
         if (MashupPlatform) {
             loadPreferences();
 
-            // Register wiring callback
-            MashupPlatform.wiring.registerCallback('activate_detection', function (data) {
-                loadVideo();
-            });
+            //
+            // MashupPlatform.wiring.registerCallback('activate_detection', function (data) {
+            //     loadVideo();
+            // });
 
             // Register preference callback
             MashupPlatform.prefs.registerCallback(function () {
@@ -175,7 +174,6 @@ var CrowdDetector = (function () {
         window.setInterval(send_all_wiring, 1000);
 
         // // Connect to server url
-        // url = "ws://localhost:8082/crowddetector";
         connect_all(url);
     };
 
@@ -214,23 +212,24 @@ var CrowdDetector = (function () {
         }
     };
 
-    var connect_all = function (url) {
-        connect(url, WS, setWebSocketEvents);
-        if (!camera) {
-            connect(url, WSV, setWebSocketVideoEvents);
+    var connect_all = function (url, c) {
+        if (camera) {
+            connect(url, setWebSocketEvents);
+        } else {
+            connect(url, setWebSocketVideoEvents);
         }
     };
 
-    connect = function connect (url, i, events) {
-        if (wss[i] !== null) {
-            wss[i].close();
+    connect = function connect(url, events) {
+        if (wss !== null) {
+            wss.close();
         }
 
-        wss[i] = new WebSocket(url);
+        wss = new WebSocket(url);
         events();
         window.onbeforeunload = function () {
-            if (wss[i] !== null) {
-                wss[i].close();
+            if (wss !== null) {
+                wss.close();
             }
         };
     };
@@ -240,10 +239,10 @@ var CrowdDetector = (function () {
     };
 
     var setWebSocketVideoEvents = function setWebSocketVideoEvents () {
-        wss[WSV].onopen = function () {
+        wss.onopen = function () {
             loadVideo();
         };
-        wss[WSV].onmessage = function (message) {
+        wss.onmessage = function (message) {
             var parsedMessage = JSON.parse(message.data);
             switch (parsedMessage.id) {
             case 'getVideo':
@@ -272,20 +271,21 @@ var CrowdDetector = (function () {
             }
         };
 
-        wss[WSV].onerror = function () {
+        wss.onerror = function () {
             onError("Error creating websocket");
         };
     };
 
+
     setWebSocketEvents = function setWebSocketEvents () {
-        wss[WS].onopen = function () {
+        wss.onopen = function () {
             MashupPlatform.widget.log("WebSocket connected.", MashupPlatform.log.INFO);
             loadVideo();
         };
 
-        wss[WS].onmessage = function (message) {
+        wss.onmessage = function (message) {
             var parsedMessage = JSON.parse(message.data);
-            MashupPlatform.widget.log('Received message: ' + message.data, MashupPlatform.log.INFO);
+            // MashupPlatform.widget.log('Received message: ' + message.data, MashupPlatform.log.INFO);
 
             switch (parsedMessage.id) {
             case 'startResponse':
@@ -313,8 +313,7 @@ var CrowdDetector = (function () {
                 onError('Unrecognized message', parsedMessage);
             }
         };
-
-        wss[WS].onerror = function () {
+        wss.onerror = function () {
             onError("Error creating WebSocket");
         };
     };
@@ -339,7 +338,7 @@ var CrowdDetector = (function () {
                     filter: false,
                     dots: []
                 };
-                sendMessage(message, WSV);
+                sendMessage(message);
             }, onError);
         }
     };
@@ -378,10 +377,10 @@ var CrowdDetector = (function () {
             });
     };
 
-    sendMessage = function sendMessage (message, i) {
+    sendMessage = function sendMessage (message) {
         var jsonMessage = JSON.stringify(message);
         window.console.log('Sending message: ' + jsonMessage);
-        wss[i].send(jsonMessage);
+        wss.send(jsonMessage);
     };
 
     clearDots = function clearDots () {
@@ -473,7 +472,6 @@ var CrowdDetector = (function () {
             o_occupancy = occupancy.slice(0);
             oc_send = true;
         }
-
     };
 
     // var add_max = function(arr, v, m) {
@@ -522,7 +520,7 @@ var CrowdDetector = (function () {
         window.console.log("Starting remote video detecting");
         setState(I_AM_STARTING);
 
-        stop_v();
+        stop();
         hidePath();
         webRtcVideo = kurentoUtils.WebRtcPeer.startRecvOnly(videoInput, function (offerSdp) {
             var message = {
@@ -532,7 +530,7 @@ var CrowdDetector = (function () {
                 filter: true,
                 dots: prepare_points_server()
             };
-            sendMessage(message, WSV);
+            sendMessage(message);
         }, onError);
     };
 
@@ -547,7 +545,7 @@ var CrowdDetector = (function () {
     };
 
     stop = function stop() {
-        window.console.log("Stopping video call ...");
+        window.console.log("Stopping video streaming ...");
         setState(I_CAN_START);
         if (webRtcPeer) {
             webRtcPeer.dispose();
@@ -555,31 +553,17 @@ var CrowdDetector = (function () {
             var message = {
                 id: 'stop'
             };
-            sendMessage(message, WS);
-        }
-    };
-
-    var stop_v = function stop_v() {
-        window.console.log("Stopping Video Streaming");
-        setState(I_CAN_START);
-        if (webRtcVideo) {
-            webRtcVideo.dispose();
-            webRtcVideo = null;
-            var message = {
-                id: 'stop'
-            };
-            sendMessage(message, WSV);
+            sendMessage(message);
         }
     };
 
     var stop_all = function stop_all() {
         hideSpinner(videoInput, videoOutput);
         stop();
-        stop_v();
     };
 
     var startVideo = function startVideo(message) {
-        if (message.response !== 'accepted') {
+        if (!message.accepted) {
             onError("Can't load the video. Reason: " + message.message);
             if (webRtcVideo) {
                 webRtcVideo.dispose();
@@ -590,6 +574,9 @@ var CrowdDetector = (function () {
             window.console.log("Video received from server. Processing...");
             if (message.filter) {
                 setState(I_CAN_STOP);
+                setIntervalX(recalculate, 500, 12);
+            } else {
+                setState(I_AM_WITH_VIDEO);
                 setIntervalX(recalculate, 500, 12);
             }
             webRtcVideo.processSdpAnswer(message.sdpAnswer); // If WebRtcEndpoint
@@ -612,6 +599,7 @@ var CrowdDetector = (function () {
 
     setState = function setState (nextState) {
         switch (nextState) {
+        case I_AM_WITH_VIDEO:
         case I_CAN_START:
             $('#start').attr('disabled', false);
             $('#stop').attr('disabled', true);
@@ -638,7 +626,7 @@ var CrowdDetector = (function () {
             sdpOffer: offerSdp,
             dots: prepare_points_server()
         };
-        sendMessage(message, WS);
+        sendMessage(message);
     };
 
     onError = function onError (error) {
@@ -1119,12 +1107,27 @@ var CrowdDetector = (function () {
         return url;
     };
 
+    var getUseCamera = function () {
+        return camera;
+    };
+
+    var getFilePath = function () {
+        return file_path;
+    };
+
+    var getState = function () {
+        return state;
+    };
+
     var setCanvas = function (e) {
         canvas = e;
     };
 
     CrowdDetector.prototype = {
         'getUrl': getUrl,
+        'getUseCamera': getUseCamera,
+        'getFilePath': getFilePath,
+        'getState': getState,
         'loadPreferences': loadPreferences,
         'getClickPosition': getClickPosition,
         'getPercentage': getPercentage,

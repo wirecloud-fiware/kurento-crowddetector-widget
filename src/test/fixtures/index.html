@@ -1,0 +1,18 @@
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="http://www.kurento.org" target="_blank">
+                <img src="images/kurento.png" />
+            </a>
+        </div><!-- ./navbar-header -->
+        <form id="form-clear" class="navbar-form form-inline navbar-right">
+            <button id="toggle-edit" type="button" class="btn btn-danger">Not Editing</button>
+            <button id="undo" type="button" class="btn btn-info">Undo</button>
+            <button id="redo" type="button" class="btn btn-info">Redo</button>
+            <button id="clear" type="button" class="btn btn-info">Clear</button>
+        </form>
+    </div><!-- /.container-fluid -->
+</div><!-- /.navbar -->
+<video id="videoInput" autoplay muted loop poster="images/fiware-logo.png"></video>
+<video id="videoOutput" class="hide" autoplay muted loop poster ="images/fiware-logo.png"></video>
+<div id="myCanvas"> </div>

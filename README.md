@@ -1,6 +1,7 @@
-## Introduction
+Kurento CrowdDetector widget
+======================
 
-This [widget](https://github.com/wirecloud-fiware/kurento-crowddetector-widget/tree/develop) provide an easy way for use a video and detect people in the areas selected in your dashboard.
+The kurento CrowdDetector widget is a WireCloud widget that provides an easy way for use a video and detect people in the areas selected in your dashboard.
 
 This CrowdDetector widget need a
 [service](https://github.com/wirecloud-fiware/kurento-example-services-scala)
@@ -9,13 +10,53 @@ instance of this service on FIWARE Lab
 (https://wirecloudkurento.lab.fiware.org/). This server is used by default, but
 you can deploy your own version and configure this widget for using it instead.
 
-Latest version of this widget is always [provided in FIWARE lab](https://store.lab.fiware.org/search/keyword/CrowdDetector) where you can make use of it on the [Mashup portal](https://mashup.lab.fiware.org/)
+Latest version of this widget is always [provided in FIWARE lab](https://store.lab.fiware.org/search/keyword/KurentoStarterKit) where you can make use of it on the [Mashup portal](https://mashup.lab.fiware.org/)
+
+Build
+-----
+
+Be sure to have installed [Node.js](http://node.js) and [Bower](http://bower.io)
+in your system. For example, you can install it on Ubuntu and Debian running the
+following commands:
+
+```bash
+curl -sL https://deb.nodesource.com/setup | sudo bash -
+sudo apt-get install nodejs
+sudo apt-get install npm
+sudo npm install -g bower
+```
+
+If you want the last version of the widget, you should change to the `develop` branch:
+
+```bash
+git checkout develop
+```
+
+Install other npm dependencies by running: (need root because some libraries use applications, check package.json before to be sure)
+
+```bash
+sudo npm install
+```
+
+For build the widget you need download grunt:
+
+```bash
+sudo npm install -g grunt-cli
+```
+
+And now, you can use grunt:
+
+```bash
+grunt
+```
+
+If everything goes well, you will find a wgt file in the `dist` folder.
 
 ## Settings
 
-- **Server URL** - URL of the crowddetector server. - Default:  `wss://wirecloudkurento.lab.fiware.org/crowddetector`
+- **Server URL** - URL of the crowddetector server. - Default: `wss://wirecloudkurento.lab.fiware.org/crowddetector`
 - **User Camera** - If checked the widget will use the local webcam, if not will use a remote video. - Default: `true`
-- **File Path** - The remote URL or path in the server (absolute with file:// or relative) to load when **User Camera** is unchecked. - Default: `videos/6.mp4`
+- **File Path** - The remote URL or a video file available on the server to load when **User Camera** is unchecked. - Default: `videos/6.mp4`
 
 ## Wiring
 
@@ -33,7 +74,6 @@ Latest version of this widget is always [provided in FIWARE lab](https://store.l
 ### Use a remote video.
 
 You have to uncheck the **User Camera** setting and set in the **File Path** setting the video you want.
-
 
 The video path can be a remote video (`http://...`) or a video name available on the server (See [service documentation](https://github.com/wirecloud-fiware/kurento-example-services-scala) for more details about how to load video).
 
