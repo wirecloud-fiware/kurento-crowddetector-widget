@@ -1,4 +1,4 @@
-/*global $, beforeEach, beforeAll, describe, it, expect, affix, MashupPlatform, CrowdDetector, kurentoUtils*/
+/*global $, MashupPlatform, CrowdDetector, kurentoUtils, beforeAll, afterAll*/
 
 
 (function () {
@@ -66,10 +66,6 @@
 
 
     describe("Test CrowdDetector click", function () {
-        beforeAll(function () {
-            // Remove the previous canvas
-            $("#myCanvas").remove();
-        });
 
         beforeEach(function () {
             widget = new CrowdDetector();
@@ -190,11 +186,6 @@
 
         var async_interval = null;
 
-        beforeAll(function () {
-            // Remove the previous canvas
-            $("#myCanvas").remove();
-        });
-
         beforeEach(function () {
 
             prefsGetValues = {
@@ -220,6 +211,7 @@
             MashupPlatform.setStrategy(new MyStrategy(), values);
 
             // affix("#myCanvas");
+
 
             widget = new CrowdDetector();
         });
@@ -299,10 +291,8 @@
     describe("Test events", function(){
         var widget, values, prefsGetValues, contextGetValues;
         var async_interval = null;
-        beforeAll(function () {
-            // Remove the previous canvas
-            $("#myCanvas").remove();
-        });
+        var oldShowSpinner = null;
+
         beforeEach(function () {
 
             prefsGetValues = {
@@ -327,12 +317,21 @@
 
             MashupPlatform.setStrategy(new MyStrategy(), values);
 
-            // affix("#myCanvas");
+            var generateSpy = function (element, method) {
+                spyOn(document.getElementById(element), method);
+            };
+
+            generateSpy('videoInput', 'addEventListener');
+            generateSpy('videoOutput', 'addEventListener');
+
             widget = new CrowdDetector();
-            widget.reset(); // I don't know why but new don't create a new instance u.U
+            oldShowSpinner = oldShowSpinner || widget.getShowSpinner();
+            widget.setShowSpinner(function() {
+            });
         });
 
         afterEach(function () {
+            // widget.setShowSpinner(oldShowSpinner);
             widget.reset();
             restorelog(); // Restore the log function
             clearDocument();
@@ -399,6 +398,7 @@
         });
         it("finish clicking first", function(){
             // canvasInit();
+            spyOn(window, 'setTimeout');
             widget.handle_edit(); // Start edit!
             var t = clickInit(10, 10, 0, 0);
             widget.handler(t);
@@ -415,6 +415,7 @@
 
         it("stop edit when can stop!", function(){
             proxylog();
+            spyOn(window, 'setTimeout');
             widget.handle_edit(); // Start edit!
             var t = clickInit(10, 10, 0, 0);
             widget.handler(t);
@@ -430,6 +431,174 @@
 
             widget.handle_edit();
         });
+
+        it("when stop, clean not finished!", function(){
+            proxylog();
+            spyOn(window, 'setTimeout');
+            widget.handle_edit(); // Start edit!
+            var t = clickInit(10, 10, 0, 0);
+            widget.handler(t);
+            t = clickInit(20, 20, 0, 0);
+            widget.handler(t);
+            t = clickInit(30, 10, 0, 0);
+            widget.handler(t);
+
+            t = clickInit(10, 10, 0, 0);
+            t.target.id = 'Dot0_0';
+            widget.handler(t);
+
+            t = clickInit(50, 20, 0, 0);
+            widget.handler(t);
+
+            expect(widget.getActual()).toBe(1);
+            expect($('.circle').length).toEqual(4);
+            widget.handle_edit();
+            expect($('.circlenoedit').length).toEqual(3);
+            expect(widget.getActual()).toBe(1);
+        });
+
+        it("redo and undo of add nodes", function () {
+            proxylog();
+            spyOn(window, 'setTimeout');
+            widget.handle_edit(); // Start edit!
+            var t = clickInit(10, 10, 0, 0);
+            widget.handler(t);
+            t = clickInit(20, 20, 0, 0);
+            widget.handler(t);
+            t = clickInit(30, 10, 0, 0);
+            widget.handler(t);
+
+            t = clickInit(10, 10, 0, 0);
+            t.target.id = 'Dot0_0';
+            widget.handler(t);
+
+            expect(widget.getActual()).toBe(1);
+            widget.undo_action();
+            expect(widget.getActual()).toBe(0);
+            widget.redo_action();
+            expect(widget.getActual()).toBe(1);
+        });
+
+        it("redo and undo of finish path", function () {
+            proxylog();
+            spyOn(window, 'setTimeout');
+            widget.handle_edit(); // Start edit!
+            var t = clickInit(10, 10, 0, 0);
+            widget.handler(t);
+            t = clickInit(20, 20, 0, 0);
+            widget.handler(t);
+            t = clickInit(30, 10, 0, 0);
+            widget.handler(t);
+
+            expect($('.circle').length).toBe(3);
+            widget.undo_action();
+            widget.undo_action();
+            widget.undo_action();
+            expect($('.circle').length).toBe(0);
+            widget.redo_action();
+            widget.redo_action();
+            widget.redo_action();
+            expect($('.circle').length).toBe(3);
+        });
+
+        it("redo and undo of move node", function () {
+            proxylog();
+            var circles = [];
+            widget.setCanvas({clientHeight: 480, clientWidth: 640,
+                              appendChild: function(c) {
+                                  circles.push(c);
+                                  document.getElementById('myCanvas').appendChild(c);
+                              }});
+            spyOn(window, 'setTimeout');
+            widget.handle_edit(); // Start edit!
+            var t = clickInit(10, 10, 0, 0);
+            widget.handler(t);
+
+            var data = {pos: [315, 315],
+                        el: $('#Dot0_0')[0]
+                       };
+            var old_left = parseFloat($('#Dot0_0')[0].style.top);
+            widget.stopDrag(data);
+
+            widget.undo_action();
+            expect($('.circle').length).toBe(1);
+            widget.redo_action();
+            expect($('.circle').length).toBe(1);
+        });
+
+        it("close stopDrag inside limits", function(){
+            var circles = [];
+            widget.setCanvas({clientHeight: 480, clientWidth: 640,
+                              appendChild: function(c) {
+                                  circles.push(c);
+                                  document.getElementById('myCanvas').appendChild(c);
+                              }});
+            widget.handle_edit();
+
+            var t = clickInit(10, 10, 0, 0);
+            widget.handler(t);
+            t = clickInit(20, 20, 0, 0);
+            widget.handler(t);
+
+            // Let's drag the second close! :)
+            var data = {pos: [15, 15],
+                        el: $('#Dot0_1')[0]
+                       };
+            var old_left = parseFloat($('#Dot0_1')[0].style.left);
+            widget.stopDrag(data);
+            var new_left = parseFloat($('#Dot0_1')[0].style.left);
+
+            expect($('.circle').length).toEqual(2);
+            expect(new_left - old_left < 1.0).toBeTruthy();
+        });
+
+        it("long stopDrag inside limits", function(){
+            var circles = [];
+            widget.setCanvas({clientHeight: 480, clientWidth: 640,
+                              appendChild: function(c) {
+                                  circles.push(c);
+                                  document.getElementById('myCanvas').appendChild(c);
+                              }});
+            widget.handle_edit();
+
+            var t = clickInit(10, 10, 0, 0);
+            widget.handler(t);
+            t = clickInit(20, 20, 0, 0);
+            widget.handler(t);
+
+            // Let's drag the second close! :)
+            var data = {pos: [215, 215],
+                        el: $('#Dot0_1')[0]
+                       };
+            var old_left = parseFloat($('#Dot0_1')[0].style.left);
+            widget.stopDrag(data);
+            var new_left = parseFloat($('#Dot0_1')[0].style.left);
+
+            expect($('.circle').length).toEqual(2);
+            expect(new_left - old_left > 1.0).toBeTruthy();
+        });
+
+        it("test canplay callback", function() {
+            var vi = document.getElementById('videoInput');
+            var vo = document.getElementById('videoOutput');
+            var canplaylistener = vi.addEventListener.calls.argsFor(0)[1];
+            canplaylistener();
+
+            expect(vi.className).toBe('');
+            expect(vo.className).toBe('hide');
+        });
+
+        it("test canplay callback videoOutput", function() {
+            var vi = document.getElementById('videoInput');
+            var vo = document.getElementById('videoOutput');
+            var canplaylistener = vo.addEventListener.calls.argsFor(0)[1];
+            canplaylistener();
+
+            expect(vi.className).toBe('hide');
+            expect(vo.className).toBe('');
+        });
+
+
     });
 
     describe("Array equals", function () {
@@ -461,7 +630,7 @@
             var b = [1, 2, [3, 4]];
             expect(a.equals(b)).toBeTruthy();
         });
-        it("Two complex arrays distintct", function() {
+        it("Two complex arrays distinct", function() {
             var a = [1, 2, [3, 4]];
             var b = [1, 2, [3, 5]];
             expect(a.equals(b)).toBeFalsy();

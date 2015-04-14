@@ -104,6 +104,8 @@ var CrowdDetector = (function () {
 
         timer = 0;
 
+        webRtcVideo = null;
+
         redding = false;
         dragging = false;
         can_edit = false;
@@ -1119,14 +1121,6 @@ var CrowdDetector = (function () {
         return file_path;
     };
 
-    var getVideoInput = function () {
-        return videoInput;
-    };
-
-    var getVideoOutput = function () {
-        return videoOutput;
-    };
-
     var getState = function () {
         return state;
     };
@@ -1143,13 +1137,24 @@ var CrowdDetector = (function () {
         canvas = e;
     };
 
+    var setCanvasSize = function (x, y) {
+        canvas.style.width = x;
+        canvas.style.height = y;
+    };
+
+    var getShowSpinner = function () {
+        return showSpinner;
+    };
+
+    var setShowSpinner = function (f) {
+        showSpinner = f;
+    };
+
     CrowdDetector.prototype = {
         'reset': reset,
         'getUrl': getUrl,
         'getUseCamera': getUseCamera,
         'getFilePath': getFilePath,
-        'getVideoInput': getVideoInput,
-        'getVideoOutput': getVideoOutput,
         'getState': getState,
         'getCanEdit': getCanEdit,
         'getActual': getActual,
@@ -1157,12 +1162,19 @@ var CrowdDetector = (function () {
         'getClickPosition': getClickPosition,
         'getPercentage': getPercentage,
         'setCanvas': setCanvas,
+        'setCanvasSize': setCanvasSize,
         'arrayequals': Array.prototype.equals,
         'start_edit': start_edit,
         'handle_edit': handle_edit,
-        'handler': handler
+        'handler': handler,
+        'getShowSpinner': getShowSpinner,
+        'setShowSpinner': setShowSpinner,
+        'stopDrag': _stopDrag,
+        'redo_action': redo_action,
+        'undo_action': undo_action
     };
-    /* end-test-code */
+
+    /* end-testcode */
 
     return CrowdDetector;
 

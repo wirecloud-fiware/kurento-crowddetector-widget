@@ -13,6 +13,8 @@ window.jsPlumb = (function () {
         reset: jasmine.createSpy('reset'),
         repaintEverything: jasmine.createSpy('repaintEverything'),
         'addEndpoint': jasmine.createSpy('addEndpoint'),
+        'deleteEndpoint': jasmine.createSpy('deleteEndpoint'),
+        'remove': jasmine.createSpy('remove'),
         'connect': jasmine.createSpy('connect'),
         'draggable': jasmine.createSpy('draggable'),
         'detachAllConnections': jasmine.createSpy('detachAllConnections'),
@@ -35,6 +37,10 @@ window.jsPlumb = (function () {
         // window.console.log(name, uuid.uuid);
         endpoints[uuid.uuid] = name;
         return endpoint;
+    });
+
+    instance.remove.and.callFake(function(e) {
+        document.getElementById('myCanvas').removeChild(document.getElementById(e));
     });
 
     instance.connect.and.callFake(function(obj){
