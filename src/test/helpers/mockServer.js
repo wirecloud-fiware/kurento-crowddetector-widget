@@ -21,7 +21,7 @@
                         id: 'getVideo',
                         accepted: true,
                         response: 'accepted',
-                        filter: false,
+                        filter: data.dots.length > 0,
                         sdpAnswer: "testsdp"
                     }));
                 }
