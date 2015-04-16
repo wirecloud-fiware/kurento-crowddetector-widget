@@ -1,5 +1,5 @@
 {
-    "name": "Kurento-Crowd-Detector",
+    "name": "kurento-crowddetector",
     "homepage": "https://github.com/wirecloud-fiware/kurento-crowddetector-widget",
     "version": "0.3.2",
     "vendor": "CoNWeT",

@@ -31,7 +31,8 @@
         },
         "jsPlumb": {
             "js": "dist/js/dom.jsPlumb-1.7.2-min.js"
-        }
+        },
+        "mock-socket": {}
     },
     "devDependencies": {
         "mock-socket": "~0.0.8"
