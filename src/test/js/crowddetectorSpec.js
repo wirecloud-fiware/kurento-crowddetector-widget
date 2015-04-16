@@ -31,6 +31,21 @@
         return null;
     };
 
+    var getWiringData = function() {
+        var calls = MashupPlatform.wiring.pushEvent.calls;
+        var count = calls.count();
+        var res = {crowd_occupancy: [],
+               crowd_fluidity: []};
+        for (var i = count - 1; i >= 0; i--) {
+            var args = calls.argsFor(i);
+            var json = JSON.parse(args[1]);
+            if(json.data.length == 2) {
+                res[args[0]].push(json.data[1]);
+            }
+        }
+        return res;
+    };
+
     var print = function print(x) {
         window.console.log(x);
     };
@@ -1007,7 +1022,49 @@
                 setTimeout(function () {
                     expect(widget.getState()).toEqual(1); // With video
                     done();
-                }, 100);
+                }, 30);
+
+            }, 2200);
+        });
+
+        it("Try get a video that exist with filter", function(done) {
+            proxylog(); // Prevent logs
+            MashupPlatform.wiring.pushEvent.calls.reset();
+            prefsGetValues['use-camera'] = false;
+            prefsGetValues['file-path'] = 'all.mp4';
+            expect(widget.getState()).toEqual(0); // Can start
+            widget.loadPreferences();
+            setTimeout(function() {
+                expect(widget.getState()).toEqual(3); // With video
+
+                widget.handle_edit(); // Start edit!
+                var t = clickInit(10, 10, 0, 0);
+                widget.handler(t);
+                t = clickInit(20, 20, 0, 0);
+                widget.handler(t);
+                t = clickInit(30, 10, 0, 0);
+                widget.handler(t);
+
+                t = clickInit(10, 10, 0, 0);
+                t.target.id = 'Dot0_0';
+                widget.handler(t);
+                widget.handle_edit();
+
+                expect(widget.getState()).toEqual(0); // With video
+
+                setTimeout(function () {
+                    expect(widget.getState()).toEqual(1); // With video
+                    widget.send_all_wiring();
+                    var d = getWiringData();
+                    expect(d.crowd_occupancy.length).toBe(1);
+                    expect(d.crowd_fluidity.length).toBe(1);
+                    expect(d.crowd_occupancy[0]).toEqual(['0',30]);
+                    // expect(d.crowd_occupancy[1]).toEqual(['0',0]);
+                    expect(d.crowd_fluidity[0]).toEqual(['0',30]);
+                    // expect(d.crowd_fluidity[1]).toEqual(['0',0]);
+
+                    done();
+                }, 30);
 
             }, 2200);
         });

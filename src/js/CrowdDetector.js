@@ -1185,7 +1185,9 @@ var CrowdDetector = (function () {
         'setIntervalX': setIntervalX,
         'hidePath': hidePath,
         'showPath': showPath,
-        'setState': setState
+        'setState': setState,
+        'send_all_wiring': send_all_wiring //,
+        // 'start': start
     };
 
     /* end-testcode */
