@@ -70,6 +70,8 @@ var CrowdDetector = (function () {
 
     var occupancy, fluidity, o_occupancy, o_fluidity, oc_last_8, fl_last_8, oc_send, fl_send;
 
+    var sdp_offer;
+
     /********************************************************/
     /**********************CONSTRUCTOR***********************/
     /********************************************************/
@@ -101,6 +103,8 @@ var CrowdDetector = (function () {
         fl_last_8 = [];
         fl_send = false;
         oc_send = false;
+
+        sdp_offer = '';
 
         timer = 0;
 
@@ -333,6 +337,7 @@ var CrowdDetector = (function () {
     var activateVideo = function activateVideo () {
         if (!webRtcVideo) {
             webRtcVideo = kurentoUtils.WebRtcPeer.startRecvOnly(videoInput, function (offerSdp) {
+                sdp_offer = offerSdp;
                 var message = {
                     id: 'getVideo',
                     sdpOffer: offerSdp,
@@ -526,6 +531,7 @@ var CrowdDetector = (function () {
         hidePath();
 
         webRtcVideo = kurentoUtils.WebRtcPeer.startRecvOnly(videoInput, function (offerSdp) {
+            sdp_offer = offerSdp;
             var message = {
                 id: 'getVideo',
                 sdpOffer: offerSdp,
@@ -582,21 +588,29 @@ var CrowdDetector = (function () {
                 setState(I_AM_WITH_VIDEO);
                 setIntervalX(recalculate, 500, 12);
             }
-            webRtcVideo.processSdpAnswer(message.sdpAnswer); // If WebRtcEndpoint
-            window.setTimeout(function () {
-                if (webRtcVideo.pc) {
-                    stream = webRtcVideo.pc.getRemoteStreams()[0]; // In the new version
-                } else if (webRtcVideo.getRemoteStream) {
-                    stream = webRtcVideo.getRemoteStream();
-                }
-            }, 2000);
+            if (typeof webRtcVideo != 'undefined') {
+                var sdpa = message.sdpAnswer;
+                var newsdpa = addMidsForFirefox(sdp_offer, sdpa);
+                webRtcVideo.processSdpAnswer(newsdpa); // If WebRtcEndpoint
+                window.setTimeout(function () {
+                    if (webRtcVideo.pc) {
+                        stream = webRtcVideo.pc.getRemoteStreams()[0]; // In the new version
+                    } else if (webRtcVideo.getRemoteStream) {
+                        stream = webRtcVideo.getRemoteStream();
+                    }
+                }, 2000);
+            } else {
+                MashupPlatform.widget.log('Something wrong happened', MashupPlatform.log.ERROR);
+            }
         }
     };
 
     startResponse = function startResponse(message) {
         setState(I_CAN_STOP);
         window.console.log("SDP answer received from server. Processing ...");
-        webRtcPeer.processSdpAnswer(message.sdpAnswer);
+        var sdpa = message.sdpAnswer;
+        var newsdpa = addMidsForFirefox(sdp_offer, sdpa);
+        webRtcPeer.processSdpAnswer(newsdpa);
         setIntervalX(recalculate, 500, 12);
     };
 
@@ -699,6 +713,46 @@ var CrowdDetector = (function () {
                 f();
             }
         }, delay);
+    };
+
+
+    var addMidsForFirefox = function addMidsForFirefox(sdpOffer, sdpAnswer) {
+        var sdpOfferLines = sdpOffer.split("\r\n");
+        var bundleLine = "";
+        var audioMid = "";
+        var videoMid = "";
+        var nextMid = "";
+        var i;
+        for (i = 0; i < sdpOfferLines.length; ++i) {
+            if (sdpOfferLines[i].indexOf("a=group:BUNDLE") === 0) {
+                bundleLine = sdpOfferLines[i];
+            } else if (sdpOfferLines[i].indexOf("m=") === 0) {
+                nextMid = sdpOfferLines[i].split(" ")[0];
+            } else if (sdpOfferLines[i].indexOf("a=mid") === 0) {
+                if (nextMid === "m=audio") {
+                    audioMid = sdpOfferLines[i];
+                } else if (nextMid === "m=video") {
+                    videoMid = sdpOfferLines[i];
+                }
+            }
+        }
+
+        var newsdpa = sdpAnswer.replace(/a=group:BUNDLE.*/, bundleLine)
+                .replace(/a=mid:audio/, audioMid)
+                .replace(/a=mid:video/, videoMid);
+
+        if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+            var splitted = bundleLine.replace('\r\n', '').split(' ');
+            if (splitted.length >= 3) {
+                newsdpa = newsdpa.replace('m=video', 'a=mid:' + splitted[1] + '\r\nm=video');
+                newsdpa = newsdpa + 'a=mid:' + splitted[2] + '\r\n';
+
+            }
+            return newsdpa;
+        } else {
+            return sdpAnswer;
+        }
+
     };
 
     /****************************************/
