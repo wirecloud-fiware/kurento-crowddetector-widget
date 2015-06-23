@@ -6,7 +6,8 @@
         "adapter.js": "*",
         "kurento-utils": "release-5.1",
         "jquery-ui": "~1.9.2",
-        "jsPlumb": "1.7.2"
+        "jsPlumb": "1.7.2",
+        "mock-applicationmashup": "~0.0.4"
     },
     "exportsOverride": {
         "adapter.js": {
@@ -32,9 +33,10 @@
         "jsPlumb": {
             "js": "dist/js/dom.jsPlumb-1.7.2-min.js"
         },
+        "mock-applicationmashup": {},
         "mock-socket": {}
     },
     "devDependencies": {
-        "mock-socket": "~0.0.8"
+        "mock-socket": "~0.5.0"
     }
 }

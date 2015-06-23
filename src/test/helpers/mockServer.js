@@ -52,7 +52,7 @@
     window.mockServer = new MockServer('ws://kurento.example.com');
     window.mockServer.on('connection', function (server) {
         server.on('message', function (event) {
-            var data = JSON.parse(event.data);
+            var data = JSON.parse(event);
 
             switch (data.id) {
             case "getVideo":
