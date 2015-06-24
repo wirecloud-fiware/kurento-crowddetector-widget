@@ -385,9 +385,11 @@ var CrowdDetector = (function () {
     };
 
     sendMessage = function sendMessage (message) {
-        var jsonMessage = JSON.stringify(message);
-        window.console.log('Sending message: ' + jsonMessage);
-        wss.send(jsonMessage);
+        if (typeof wss !== 'undefined' && wss !== null) {
+            var jsonMessage = JSON.stringify(message);
+            window.console.log('Sending message: ' + jsonMessage);
+            wss.send(jsonMessage);
+        }
     };
 
     clearDots = function clearDots () {

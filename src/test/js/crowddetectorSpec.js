@@ -9,8 +9,6 @@
 
     jasmine.getFixtures().fixturesPath = 'src/test/fixtures/';
 
-    window.MashupPlatform = new MockMP.MockMP();
-
     var dependencyList = [
         'script',
         'div#jasmine-fixtures',
@@ -46,6 +44,20 @@
             }
         }
         return res;
+    };
+
+    var buildPrefs = function buildPrefs(camera, path, url) {
+        if (typeof camera == 'undefined')
+            camera = true;
+        if (typeof path == 'undefined')
+            path = 'notExist.mp4';
+        if (typeof url == 'undefined')
+            url = 'ws://kurento.example.com';
+        return {
+            'server-url': url,
+            'use-camera': camera,
+            'file-path': path
+        };
     };
 
     var print = function print(x) {
@@ -739,11 +751,7 @@
         var widget, values, prefsGetValues, contextGetValues;
         var oldShowSpinner = null;
 
-        prefsGetValues = {
-            'server-url': 'ws://kurento.example.com',
-            'use-camera': true,
-            'file-path': 'notExist.mp4'
-        };
+        prefsGetValues = buildPrefs();
 
         contextGetValues = {
             'username': ''
@@ -762,16 +770,11 @@
         };
 
         beforeEach(function () {
-
+            MashupPlatform.reset();  // Reset to the previous values!
 
             loadFixtures('index.html');
 
-            MashupPlatform.reset();
-            // MashupPlatform.prefs.registerCallback.calls.reset();
-            // MashupPlatform.wiring.registerCallback.calls.reset();
             kurentoUtils.withErrors = false;
-
-            // MashupPlatform.setStrategy(new MyStrategy(), values);
 
             var generateSpy = function (element, method) {
                 spyOn(document.getElementById(element), method);
@@ -788,7 +791,6 @@
 
         afterEach(function () {
             // widget.setShowSpinner(oldShowSpinner);
-            widget.reset();
             restorelog(); // Restore the log function
             clearDocument();
         });
@@ -836,7 +838,6 @@
             expect(vo.className).toBe('hide');
             expect($("#myCanvas")[0].className).toBe('');
         });
-
 
         it("test canplay callback videoOutput", function() {
             var vi = document.getElementById('videoInput');
@@ -898,23 +899,6 @@
 
         var async_interval = null;
 
-        var buildPrefs = function buildPrefs(camera, path, url) {
-            if (typeof camera == 'undefined')
-                camera = true;
-            if (typeof path == 'undefined')
-                path = 'notExist.mp4';
-            if (typeof url == 'undefined')
-                url = 'ws://kurento.example.com';
-            return {
-                'server-url': url,
-                'use-camera': camera,
-                'file-path': path
-            };
-        };
-
-        var setTestStrategy = function setTestStrategy(values) {
-            window.MashupPlatform = new MockMP.MockMP(values);
-        };
 
         prefsGetValues = buildPrefs();
 
@@ -926,20 +910,14 @@
             "context.get": MockMP.strategy.dict(contextGetValues),
             "prefs.get": MockMP.strategy.dict(prefsGetValues)
         };
-        setTestStrategy(values);
+
+        window.MashupPlatform = new MockMP.MockMP(values);
 
         beforeEach(function () {
-            loadFixtures('index.html');
-            setTestStrategy(values);
             MashupPlatform.reset();
-            // MashupPlatform.prefs.registerCallback.calls.reset();
-            // MashupPlatform.wiring.registerCallback.calls.reset();
+            loadFixtures('index.html');
+
             kurentoUtils.withErrors = false;
-
-            // MashupPlatform.setStrategy(new MyStrategy(), values);
-
-            // affix("#myCanvas");
-
 
             widget = new CrowdDetector();
         });
@@ -964,36 +942,48 @@
         });
 
         it("change the url preference", function () {
-            prefsGetValues['server-url'] = 'ws://kurento2.example.com';
-            expect(prefsGetValues['server-url']).toBe('ws://kurento2.example.com');
+            proxylog(); // Prevent logs
+            var newurl = 'ws://kurento2.example.com';
+            // var newprefs = buildPrefs(undefined, undefined, newurl);
+            MashupPlatform.prefs.set('server-url', newurl);
+            // MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
+
+            expect(MashupPlatform.prefs.get('server-url')).toBe(newurl);
 
             widget.loadPreferences();
 
-            expect(widget.getUrl()).toBe(prefsGetValues['server-url']);
+            expect(widget.getUrl()).toBe(newurl);
         });
 
         it("change the file path preference", function () {
-            prefsGetValues['file-path'] = 'videos/otherFile.mp4';
-            expect(prefsGetValues['file-path']).toBe('videos/otherFile.mp4');
+            proxylog(); // Prevent logs
+            var newfile = 'videos/otherFile.mp4';
+            // var newprefs = buildPrefs(undefined, 'videos/otherFile.mp4');
+            MashupPlatform.prefs.set('file-path', newfile);
+            // MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
+            expect(MashupPlatform.prefs.get('file-path')).toBe(newfile);
 
             widget.loadPreferences();
 
-            expect(widget.getFilePath()).toBe(prefsGetValues['file-path']);
+            expect(widget.getFilePath()).toBe(newfile);
         });
 
         it("change the 'use camera' preference", function () {
             proxylog(); // Prevent logs
-            prefsGetValues['use-camera'] = false;
-            expect(prefsGetValues['use-camera']).toBe(false);
+            // var newprefs = buildPrefs(false);
+            // MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
+            MashupPlatform.prefs.set('use-camera', false);
+            expect(MashupPlatform.prefs.get('use-camera')).toBe(false);
 
             widget.loadPreferences();
 
-            expect(widget.getUseCamera()).toBe(prefsGetValues['use-camera']);
+            expect(widget.getUseCamera()).toBe(false);
         });
 
         it("Try get a video that don't exist", function(done) {
             proxylog(); // Prevent logs
-            prefsGetValues['use-camera'] = false;
+            var newprefs = buildPrefs(false);
+            MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
             expect(widget.getState()).toEqual(0); // Can start
             widget.loadPreferences();
             setTimeout(function() {
@@ -1004,11 +994,8 @@
 
         it("Try get a video that exist", function(done) {
             proxylog(); // Prevent logs
-
-            setTestStrategy({
-                'context.get': MockMP.strategy.dict(contextGetValues),
-                'prefs.get': MockMP.strategy.dict(buildPrefs(false, 'videos/exist.mp4'))
-            });
+            var newprefs = buildPrefs(false, 'videos/exist.mp4');
+            MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
 
             expect(widget.getState()).toEqual(0); // Can start
             widget.loadPreferences();
@@ -1022,10 +1009,8 @@
         it("Try get a video that exist with filter", function(done) {
             proxylog(); // Prevent logs
 
-            setTestStrategy({
-                'context.get': MockMP.strategy.dict(contextGetValues),
-                'prefs.get': MockMP.strategy.dict(buildPrefs(false, 'videos/exist.mp4'))
-            });
+            var newprefs = buildPrefs(false, 'videos/exist.mp4');
+            MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
 
             expect(widget.getState()).toEqual(0); // Can start
             widget.loadPreferences();
@@ -1057,10 +1042,8 @@
 
         it("Try get a video that exist with filter and we get wiring data", function(done) {
             proxylog(); // Prevent logs
-            setTestStrategy({
-                'context.get': MockMP.strategy.dict(contextGetValues),
-                'prefs.get': MockMP.strategy.dict(buildPrefs(false, 'all.mp4'))
-            });
+            var newprefs = buildPrefs(false, 'all.mp4');
+            MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
 
             expect(widget.getState()).toEqual(0); // Can start
             widget.loadPreferences();

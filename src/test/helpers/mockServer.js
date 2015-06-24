@@ -49,6 +49,10 @@
     };
 
     window.mockServer2 = new MockServer('ws://kurento2.example.com');
+    window.mockServer2.on('connection', function (server) {
+        server.on('message', function (event) {});
+    });
+
     window.mockServer = new MockServer('ws://kurento.example.com');
     window.mockServer.on('connection', function (server) {
         server.on('message', function (event) {
