@@ -209,8 +209,6 @@
         });
     });
 
-
-
     describe("Edit and click tests", function () {
         var widget;
         var check_three = function(actual, circle, circlenoedit) {
@@ -911,7 +909,9 @@
             "prefs.get": MockMP.strategy.dict(prefsGetValues)
         };
 
-        window.MashupPlatform = new MockMP.MockMP(values);
+        beforeAll(function () {
+            window.MashupPlatform = new MockMP.MockMP(values);
+        });
 
         beforeEach(function () {
             MashupPlatform.reset();
@@ -944,39 +944,38 @@
         it("change the url preference", function () {
             proxylog(); // Prevent logs
             var newurl = 'ws://kurento2.example.com';
-            // var newprefs = buildPrefs(undefined, undefined, newurl);
+
+            expect(MashupPlatform.prefs.get('server-url')).toBe('ws://kurento.example.com');
+            expect(widget.getUrl()).toBe('ws://kurento.example.com');
+
             MashupPlatform.prefs.set('server-url', newurl);
-            // MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
 
             expect(MashupPlatform.prefs.get('server-url')).toBe(newurl);
-
-            widget.loadPreferences();
-
             expect(widget.getUrl()).toBe(newurl);
         });
 
         it("change the file path preference", function () {
             proxylog(); // Prevent logs
             var newfile = 'videos/otherFile.mp4';
-            // var newprefs = buildPrefs(undefined, 'videos/otherFile.mp4');
+
+            expect(MashupPlatform.prefs.get('file-path')).toBe('notExist.mp4');
+            expect(widget.getFilePath()).toBe('notExist.mp4');
+
             MashupPlatform.prefs.set('file-path', newfile);
-            // MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
+
             expect(MashupPlatform.prefs.get('file-path')).toBe(newfile);
-
-            widget.loadPreferences();
-
             expect(widget.getFilePath()).toBe(newfile);
         });
 
         it("change the 'use camera' preference", function () {
             proxylog(); // Prevent logs
-            // var newprefs = buildPrefs(false);
-            // MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
+
+            expect(MashupPlatform.prefs.get('use-camera')).toBe(true);
+            expect(widget.getUseCamera()).toBe(true);
+
             MashupPlatform.prefs.set('use-camera', false);
+
             expect(MashupPlatform.prefs.get('use-camera')).toBe(false);
-
-            widget.loadPreferences();
-
             expect(widget.getUseCamera()).toBe(false);
         });
 
@@ -984,8 +983,11 @@
             proxylog(); // Prevent logs
             var newprefs = buildPrefs(false);
             MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
+
+            widget = new CrowdDetector();
+
             expect(widget.getState()).toEqual(0); // Can start
-            widget.loadPreferences();
+
             setTimeout(function() {
                 expect(widget.getState()).toEqual(0); // Can start
                 done();
@@ -997,8 +999,9 @@
             var newprefs = buildPrefs(false, 'videos/exist.mp4');
             MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
 
+            widget = new CrowdDetector();
+
             expect(widget.getState()).toEqual(0); // Can start
-            widget.loadPreferences();
 
             setTimeout(function() {
                 expect(widget.getState()).toEqual(3); // With video
@@ -1012,8 +1015,10 @@
             var newprefs = buildPrefs(false, 'videos/exist.mp4');
             MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
 
+            widget = new CrowdDetector();
+
             expect(widget.getState()).toEqual(0); // Can start
-            widget.loadPreferences();
+
             setTimeout(function() {
                 expect(widget.getState()).toEqual(3); // With video
 
@@ -1045,8 +1050,10 @@
             var newprefs = buildPrefs(false, 'all.mp4');
             MashupPlatform.setStrategy({'prefs.get': MockMP.strategy.dict(newprefs)});
 
+            widget = new CrowdDetector();
+
             expect(widget.getState()).toEqual(0); // Can start
-            widget.loadPreferences();
+
             setTimeout(function() {
                 expect(widget.getState()).toEqual(3); // With video
 
@@ -1080,7 +1087,7 @@
                     done();
                 }, 30);
 
-            }, 2200);
+            }, 3000);
         });
     });
 

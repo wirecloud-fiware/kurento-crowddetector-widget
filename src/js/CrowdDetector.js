@@ -1218,7 +1218,6 @@ var CrowdDetector = (function () {
         'getState': getState,
         'getCanEdit': getCanEdit,
         'getActual': getActual,
-        'loadPreferences': loadPreferences,
         'getClickPosition': getClickPosition,
         'getPercentage': getPercentage,
         'setCanvas': setCanvas,
