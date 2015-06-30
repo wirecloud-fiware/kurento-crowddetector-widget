@@ -60,6 +60,18 @@
         };
     };
 
+    var prefsGetValues = buildPrefs();
+
+    var contextGetValues = {
+        'username': ''
+    };
+
+    var values = {
+        "context.get": MockMP.strategy.dict(contextGetValues),
+        "prefs.get": MockMP.strategy.dict(prefsGetValues)
+    };
+
+
     var print = function print(x) {
         window.console.log(x);
     };
@@ -96,10 +108,14 @@
 
     describe("Test CrowdDetector click", function () {
 
-        beforeEach(function () {
-            widget = new CrowdDetector();
+        beforeAll(function () {
+            window.MashupPlatform = new MockMP.MockMP(values);
         });
 
+        beforeEach(function () {
+            MashupPlatform.reset();
+            widget = new CrowdDetector();
+        });
 
         it("click in the center without offset", function () {
             canvasInit();
@@ -746,20 +762,12 @@
     });
 
     describe("Test events", function(){
-        var widget, values, prefsGetValues, contextGetValues;
+        var widget;
         var oldShowSpinner = null;
 
-        prefsGetValues = buildPrefs();
-
-        contextGetValues = {
-            'username': ''
-        };
-
-        values = {
-            "context.get": MockMP.strategy.dict(contextGetValues),
-            "prefs.get": MockMP.strategy.dict(prefsGetValues)
-        };
-        window.MashupPlatform = new MockMP.MockMP(values);
+        beforeAll(function() {
+            window.MashupPlatform = new MockMP.MockMP(values);
+        });
 
         var check_three = function(actual, circle, circlenoedit) {
             expect(widget.getActual()).toBe(actual);

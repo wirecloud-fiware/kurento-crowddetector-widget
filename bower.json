@@ -35,6 +35,6 @@
     },
     "devDependencies": {
         "mock-socket": "~0.5.1",
-        "mock-applicationmashup": "~0.0.6"
+        "mock-applicationmashup": "~0.0.8"
     }
 }
