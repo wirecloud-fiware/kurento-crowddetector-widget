@@ -1,5 +1,6 @@
 /*global $, kurentoUtils, MashupPlatform, jsPlumb*/
 /*exported CrowdDetector*/
+
 var CrowdDetector = (function () {
     "use strict";
 
@@ -491,11 +492,17 @@ var CrowdDetector = (function () {
     // };
 
     crowdDetectorDirection = function crowdDetectorDirection(message) {
+        if (typeof message.event_data === "string") {
+            message.event_data = JSON.parse(message.event_data);
+        }
         window.console.log ("Direction event received in roi " + message.event_data.roiID +
                             " with direction " + message.event_data.directionAngle);
     };
 
     crowdDetectorFluidity = function crowdDetectorFluidity(message) {
+        if (typeof message.event_data === "string") {
+            message.event_data = JSON.parse(message.event_data);
+        }
         window.console.log ("Fluidity event received in roi " + message.event_data.roiID +
                             ". Fluidity level " + message.event_data.fluidityPercentage +
                             " and fluidity percentage " + message.event_data.fluidityLevel);
@@ -507,6 +514,9 @@ var CrowdDetector = (function () {
     };
 
     crowdDetectorOccupancy = function crowdDetectorOccupancy(message) {
+        if (typeof message.event_data === "string") {
+            message.event_data = JSON.parse(message.event_data);
+        }
         window.console.log ("Occupancy event received in roi " + message.event_data.roiID +
                             ". Occupancy level " + message.event_data.occupancyPercentage +
                             " and occupancy percentage " + message.event_data.occupancyLevel);

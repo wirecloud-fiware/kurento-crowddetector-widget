@@ -8,7 +8,7 @@
     var send_data = function(server, id, data) {
         server.send(JSON.stringify({
             id: id,
-            event_data: data
+            event_data: JSON.stringify(data)
         }));
     };
 
