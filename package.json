@@ -1,7 +1,7 @@
 {
     "name": "kurento-crowddetector",
     "homepage": "https://github.com/wirecloud-fiware/kurento-crowddetector-widget",
-    "version": "0.3.3a1",
+    "version": "0.3.3",
     "vendor": "CoNWeT",
     "author": "CoNWeT Lab., Universidad Politecnica de Madrid",
     "description": "A widget for selecting areas in a video tag.",

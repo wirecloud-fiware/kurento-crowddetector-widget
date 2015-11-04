@@ -1,7 +1,9 @@
-v 0.3.2
-=============
+## v0.3.3
 
-### General
+- Fix bugs in firefox and with the data received
+- Improve stability
+
+## v0.3.2
 
 - Moved to use a [new
   implementation](https://github.com/wirecloud-fiware/kurento-example-services-scala)
@@ -9,17 +11,12 @@ v 0.3.2
 - Updated the default server URL using https
 - New widget name: kurento-crowddetector. The previous widget name was: crowddetector.
 
-v 0.3.1
-==============
-
-### General
+## v0.3.1
 
 - Added two endpoints that send data of the polygons to a Google Graph
 
 
-v 0.3.0
-==============
-
+## v0.3.0
 
 ### General
 
