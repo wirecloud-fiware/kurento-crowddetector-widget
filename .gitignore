@@ -8,3 +8,4 @@ build/
 _SpecRunner.html
 .grunt/
 src/js/.tern-port
+dist/
