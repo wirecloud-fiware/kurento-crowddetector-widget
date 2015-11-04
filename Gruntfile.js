@@ -157,7 +157,7 @@ module.exports = function (grunt) {
                              'bower_components/bootstrap/dist/js/bootstrap.js',
                              'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
                              'bower_components/mock-socket/dist/mock-socket.js',
-                             'bower_components/mock-applicationmashup/lib/vendor/mockMashupPlatform.js',
+                             'node_modules/mock-applicationmashup/lib/vendor/mockMashupPlatform.js',
                              'src/test/vendor/*.js']
                 }
             },

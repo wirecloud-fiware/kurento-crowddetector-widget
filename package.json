@@ -39,6 +39,7 @@
         "grunt-jscs": "^1.2.0",
         "grunt-text-replace": "~0.4.0",
         "jquery": "^2.1.1",
-        "jasmine-jquery": "~2.0.6"
+        "jasmine-jquery": "~2.0.6",
+	"mock-applicationmashup": "^0.0.9"
     }
 }
