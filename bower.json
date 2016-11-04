@@ -3,14 +3,14 @@
     "dependencies": {
         "bootstrap": "~3.3.0",
         "ekko-lightbox": "~3.1.4",
-        "adapter.js": "*",
         "kurento-utils": "release-5.1",
         "jquery-ui": "~1.9.2",
-        "jsPlumb": "1.7.2"
+        "jsPlumb": "1.7.2",
+        "webrtc-adapter": "adapter.js#2.0.6"
     },
     "exportsOverride": {
-        "adapter.js": {
-            "js": "adapter.js"
+        "webrtc-adapter": {
+            "js": "release/adapter.js"
         },
         "jquery": {
             "js": "dist/jquery.min.js"
@@ -27,7 +27,10 @@
             "js": "dist/ekko-lightbox.min.js"
         },
         "kurento-utils": {
-            "js": ["js/kurento-utils.js", "js/kurento-utils.map"]
+            "js": [
+                "js/kurento-utils.js",
+                "js/kurento-utils.map"
+            ]
         },
         "jsPlumb": {
             "js": "dist/js/dom.jsPlumb-1.7.2-min.js"
