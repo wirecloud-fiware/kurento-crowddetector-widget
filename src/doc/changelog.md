@@ -1,3 +1,7 @@
+## v0.3.4
+
+- Moved from adapter.js to webrtc-adapter (v2.0.6)
+
 ## v0.3.3
 
 - Fix bugs in firefox and with the data received
