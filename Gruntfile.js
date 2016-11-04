@@ -150,7 +150,7 @@ module.exports = function (grunt) {
                 frameworks: ['jasmine'],
                 reporters: ['progress', 'coverage'],
                 browsers: ['Chrome', 'Firefox'],
-                singleRun: false
+                singleRun: true
             },
             coverage: {
                 options: {
