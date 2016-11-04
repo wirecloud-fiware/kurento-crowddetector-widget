@@ -7,7 +7,7 @@
     var widget;
     var olog = window.console.log;
 
-    jasmine.getFixtures().fixturesPath = 'src/test/fixtures/';
+    jasmine.getFixtures().fixturesPath = 'base/test/fixtures/';
 
     var dependencyList = [
         'script',
