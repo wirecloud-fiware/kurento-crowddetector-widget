@@ -52,53 +52,13 @@ grunt
 
 If everything goes well, you will find a wgt file in the `dist` folder.
 
-## Settings
+## Documentation
 
-- **Server URL** - URL of the crowddetector server. - Default: `wss://wirecloudkurento.lab.fiware.org/crowddetector`
-- **User Camera** - If checked the widget will use the local webcam, if not will use a remote video. - Default: `true`
-- **File Path** - The remote URL or a video file available on the server to load when **User Camera** is unchecked. - Default: `videos/6.mp4`
-
-## Wiring
-
-### Input Endpoints
-
-**None**
-
-### Output Endpoints
-
-- **CrowdDetector Fluidity Output** - Type :: `JSON (in String)`. Send the fluidity data of all the Region Of Interest drawed periodically if there are changes to a Google Graph widget that is installed in with the [ChartsStarterKit](https://store.lab.fiware.org/offering/CoNWeT/ChartsStarterKit/1.0)
-- **CrowdDetector Occupancy Output** - Type :: `JSON (in String)`. Send the occupancy data of all the Region Of Interest drawed periodically if there are changes to a Google Graph widget that is installed in with the [ChartsStarterKit](https://store.lab.fiware.org/offering/CoNWeT/ChartsStarterKit/1.0)
-
-## Usage
-
-### Use a remote video.
-
-You have to uncheck the **User Camera** setting and set in the **File Path** setting the video you want.
-
-The video path can be a remote video (`http://...`) or a video name available on the server (See [service documentation](https://github.com/wirecloud-fiware/kurento-example-services-scala) for more details about how to load video).
-
-### Set polygons to detect.
-
-When you have a video (or local webcam) loaded, the mode will be setted to `Editing` and will be green.
-
-Once you can edit, when you click you will set a vertex and will add an edge with the previous vertex (if exists).
-
-When you want to finish a polygon you can do a double-click (will add a vertex and finish with that) or click the first vertex of the polygon.
-
-You can add all the polygons you want.
-
-### Send the video with the polygons to detect.
-
-Once you've finish at least one polygon, you have to ways to send the polygons to the server and start detecting.
-
-1. Press the `Editing` button to stop the edit.
-2. Wait 5 seconds without add or drag any vertex.
-
-## Reference
-
-- [Widget Source Code](https://github.com/wirecloud-fiware/kurento-crowddetector-widget/tree/develop)
-- [Server Source Code](https://github.com/wirecloud-fiware/kurento-example-services-scala)
-- [FIWARE Mashup](https://mashup.lab.fiware.org/)
+Documentation about how to use this widget is available on the
+[User Guide](src/doc/userguide.md). Anyway, you can find general information
+about how to use widgets on the
+[WireCloud's User Guide](https://wirecloud.readthedocs.io/en/stable/user_guide/)
+available on Read the Docs.
 
 ## Copyright and License
 

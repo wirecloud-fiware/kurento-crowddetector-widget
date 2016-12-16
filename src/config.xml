@@ -9,7 +9,7 @@
     <issuetracker>https://github.com/wirecloud-fiware/kurento-crowddetector-widget/issues</issuetracker>
     <authors>Miguel García Lafuente &lt;mgarcia@conwet.com&gt;</authors>
     <changelog>doc/changelog.md</changelog>
-    <doc>doc/index.md</doc>
+    <doc>doc/userguide.md</doc>
   </details>
   <preferences>
     <preference name="server-url" label="Server URL" description="URL of crowd detector service" type="text" default="wss://wirecloudkurento.lab.fiware.org/crowddetector"/>
