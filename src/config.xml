@@ -4,7 +4,6 @@
     <title>Kurento Crowd Detector</title>
     <email>wirecloud@conwet.com</email>
     <image>images/catalogue.png</image>
-    <smartphoneimage>images/catalogueSmartphone.png</smartphoneimage>
     <description>A widget for selecting areas in a video tag</description>
     <homepage>https://github.com/wirecloud-fiware/kurento-crowddetector-widget</homepage>
     <issuetracker>https://github.com/wirecloud-fiware/kurento-crowddetector-widget/issues</issuetracker>

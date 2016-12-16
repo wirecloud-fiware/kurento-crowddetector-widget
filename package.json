@@ -10,6 +10,7 @@
     "grunt-jscs": "^2.8.0",
     "grunt-karma": "^2.0.0",
     "grunt-strip-code": "^1.0.4",
+    "gruntify-eslint": "^3.1.0",
     "grunt-text-replace": "~0.4.0",
     "grunt-wirecloud": "^0.9.0",
     "jasmine-core": "<2.5.0",

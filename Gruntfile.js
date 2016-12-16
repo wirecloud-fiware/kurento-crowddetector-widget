@@ -1,4 +1,4 @@
-/*!
+/*
  *   Copyright 2014-2015 CoNWeT Lab., Universidad Politecnica de Madrid
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,45 +36,21 @@ module.exports = function (grunt) {
             }
         },
 
-        jshint: {
-            options: {
-                jshintrc: true
-            },
-            all: {
-                files: {
-                    src: ['src/js/**/*.js']
-                }
+        eslint: {
+            widget: {
+                src: 'src/js/**/*.js'
             },
             grunt: {
                 options: {
-                    jshintrc: '.jshintrc-node'
+                    configFile: '.eslintrc-node'
                 },
-                files: {
-                    src: ['Gruntfile.js']
-                }
+                src: 'Gruntfile.js',
             },
             test: {
                 options: {
-                    jshintrc: '.jshintrc-jasmine'
+                    configFile: '.eslintrc-jasmine'
                 },
-                files: {
-                    src: ['src/test/js/**/*.js']
-                }
-            }
-        },
-
-        jscs: {
-            widget: {
-                src: 'src/js/**/*.js',
-                options: {
-                    config: ".jscsrc"
-                }
-            },
-            grunt: {
-                src: 'Gruntfile.js',
-                options: {
-                    config: ".jscsrc"
-                }
+                src: ['src/test/**/*.js', '!src/test/fixtures/']
             }
         },
 
@@ -190,6 +166,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-bower-task');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-karma');
+    grunt.loadNpmTasks('gruntify-eslint');
     grunt.loadNpmTasks('grunt-jscs');
     grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-contrib-copy');
@@ -199,9 +176,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('test', [
         'bower:install',
-        'jshint',
-        'jshint:grunt',
-        'jscs',
+        'eslint',
         'karma:coverage'
     ]);
 

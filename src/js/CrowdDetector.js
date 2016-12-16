@@ -1,5 +1,5 @@
-/*global $, kurentoUtils, MashupPlatform, jsPlumb*/
-/*exported CrowdDetector*/
+/* global $, kurentoUtils, MashupPlatform, jsPlumb*/
+/* exported CrowdDetector*/
 
 var CrowdDetector = (function () {
     "use strict";
@@ -31,7 +31,7 @@ var CrowdDetector = (function () {
         return true;
     };
 
-    /*********************************************************
+    /** *******************************************************
      ************************CONSTANTS*************************
      *********************************************************/
 
@@ -53,11 +53,11 @@ var CrowdDetector = (function () {
         maxConnections: 4
     };
 
-    /*********************************************************
+    /** *******************************************************
      ************************VARIABLES*************************
      *********************************************************/
     var canvas, count, points, actual, timer, actions, redos, redding, dragging, can_edit, instance, wss,
-        webRtcPeer, webRtcVideo, stream, state, videoInput, videoOutput, prevDetection, url, spinner;
+        webRtcPeer, webRtcVideo, stream, state, videoInput, videoOutput, url;
     var clear, undo_btn, redo_btn, edit_btn;
 
     var camera, file_path;
@@ -69,21 +69,20 @@ var CrowdDetector = (function () {
 
     var getClickPosition;
 
-    var occupancy, fluidity, o_occupancy, o_fluidity, oc_last_8, fl_last_8, oc_send, fl_send;
+    var occupancy, fluidity, o_occupancy, o_fluidity, oc_send, fl_send;
 
     var sdp_offer;
 
-    /********************************************************/
-    /**********************CONSTRUCTOR***********************/
-    /********************************************************/
+    /** ******************************************************/
+    /** ********************CONSTRUCTOR***********************/
+    /** ******************************************************/
 
-    var CrowdDetector = function CrowdDetector () {
+    var CrowdDetector = function CrowdDetector() {
         jsPlumb.ready(function () {
             instance = clean_instance();
         });
 
         canvas = document.getElementById("myCanvas");
-        spinner = $("#spinner");
 
         clear = document.getElementById('clear');
         undo_btn = document.getElementById('undo');
@@ -100,8 +99,6 @@ var CrowdDetector = (function () {
         fluidity = [];
         o_occupancy = [];
         o_fluidity = [];
-        oc_last_8 = [];
-        fl_last_8 = [];
         fl_send = false;
         oc_send = false;
 
@@ -121,7 +118,6 @@ var CrowdDetector = (function () {
         wss = null;
         videoInput = document.getElementById('videoInput');
         videoOutput = document.getElementById('videoOutput');
-        prevDetection = false;
         setState(I_CAN_START);
 
         // Events
@@ -185,7 +181,7 @@ var CrowdDetector = (function () {
     };
 
 
-    /*********************************************************
+    /** *******************************************************
      **************************PRIVATE*************************
      *********************************************************/
 
@@ -241,11 +237,11 @@ var CrowdDetector = (function () {
         };
     };
 
-    var send_wiring = function send_wiring (name, data) {
+    var send_wiring = function send_wiring(name, data) {
         MashupPlatform.wiring.pushEvent(name, JSON.stringify(data));
     };
 
-    var setWebSocketVideoEvents = function setWebSocketVideoEvents () {
+    var setWebSocketVideoEvents = function setWebSocketVideoEvents() {
         wss.onopen = function () {
             loadVideo();
         };
@@ -284,7 +280,7 @@ var CrowdDetector = (function () {
     };
 
 
-    setWebSocketEvents = function setWebSocketEvents () {
+    setWebSocketEvents = function setWebSocketEvents() {
         wss.onopen = function () {
             MashupPlatform.widget.log("WebSocket connected.", MashupPlatform.log.INFO);
             loadVideo();
@@ -325,7 +321,7 @@ var CrowdDetector = (function () {
         };
     };
 
-    var loadVideo = function loadVideo () {
+    var loadVideo = function loadVideo() {
         // cleanVideo();
         showSpinner(videoInput, videoOutput);
         if (camera) {
@@ -335,14 +331,14 @@ var CrowdDetector = (function () {
         }
     };
 
-    var activateVideo = function activateVideo () {
+    var activateVideo = function activateVideo() {
         if (!webRtcVideo) {
             webRtcVideo = kurentoUtils.WebRtcPeer.startRecvOnly(videoInput, function (offerSdp) {
                 sdp_offer = offerSdp;
                 var message = {
                     id: 'getVideo',
                     sdpOffer: offerSdp,
-                    url:  file_path,
+                    url: file_path,
                     filter: false,
                     dots: []
                 };
@@ -351,7 +347,7 @@ var CrowdDetector = (function () {
         }
     };
 
-    var activateCamera = function activateCamera () {
+    var activateCamera = function activateCamera() {
         navigator.getMedia = (navigator.getUserMedia ||
                               navigator.webkitGetUserMedia ||
                               navigator.mozGetUserMedia ||
@@ -359,7 +355,7 @@ var CrowdDetector = (function () {
         if (!navigator.getMedia) {
             return;
         }
-        navigator.getMedia (
+        navigator.getMedia(
 
             // constraints
             {
@@ -385,7 +381,7 @@ var CrowdDetector = (function () {
             });
     };
 
-    sendMessage = function sendMessage (message) {
+    sendMessage = function sendMessage(message) {
         if (typeof wss !== 'undefined' && wss !== null) {
             var jsonMessage = JSON.stringify(message);
             window.console.log('Sending message: ' + jsonMessage);
@@ -393,7 +389,7 @@ var CrowdDetector = (function () {
         }
     };
 
-    clearDots = function clearDots () {
+    clearDots = function clearDots() {
         occupancy = [];
         fluidity = [];
         oc_send = false;
@@ -408,7 +404,7 @@ var CrowdDetector = (function () {
         instance = clean_instance();
     };
 
-    redraw = function redraw (canvasPrev) {
+    redraw = function redraw(canvasPrev) {
         if (instance) {
             instance.repaintEverything();
         }
@@ -447,7 +443,7 @@ var CrowdDetector = (function () {
         redraw();
     };
 
-    var create_chart_json = function create_chart_json (name, value) {
+    var create_chart_json = function create_chart_json(name, value) {
         var json = {
             'type': 'Gauge',
             'options': {
@@ -463,7 +459,7 @@ var CrowdDetector = (function () {
                 ['Label', 'Value']
             ]
         };
-        var n_v = 0;  //Math.round(value * 10000) / 10000;
+        var n_v = 0;  // Math.round(value * 10000) / 10000;
         for (var i = 0; i < value.length; i++) {
             n_v = Math.round(value[i] * 10000) / 10000;
             json.data.push([i.toString(), n_v]);
@@ -495,7 +491,7 @@ var CrowdDetector = (function () {
         if (typeof message.event_data === "string") {
             message.event_data = JSON.parse(message.event_data);
         }
-        window.console.log ("Direction event received in roi " + message.event_data.roiID +
+        window.console.log("Direction event received in roi " + message.event_data.roiID +
                             " with direction " + message.event_data.directionAngle);
     };
 
@@ -503,7 +499,7 @@ var CrowdDetector = (function () {
         if (typeof message.event_data === "string") {
             message.event_data = JSON.parse(message.event_data);
         }
-        window.console.log ("Fluidity event received in roi " + message.event_data.roiID +
+        window.console.log("Fluidity event received in roi " + message.event_data.roiID +
                             ". Fluidity level " + message.event_data.fluidityPercentage +
                             " and fluidity percentage " + message.event_data.fluidityLevel);
         o_fluidity = fluidity.slice(0);
@@ -517,7 +513,7 @@ var CrowdDetector = (function () {
         if (typeof message.event_data === "string") {
             message.event_data = JSON.parse(message.event_data);
         }
-        window.console.log ("Occupancy event received in roi " + message.event_data.roiID +
+        window.console.log("Occupancy event received in roi " + message.event_data.roiID +
                             ". Occupancy level " + message.event_data.occupancyPercentage +
                             " and occupancy percentage " + message.event_data.occupancyLevel);
         o_occupancy = occupancy.slice(0);
@@ -527,11 +523,11 @@ var CrowdDetector = (function () {
         oc_send = false;
     };
 
-    var hidePath = function hidePath () {
+    var hidePath = function hidePath() {
         $("#myCanvas").addClass("hide");
     };
 
-    var showPath = function showPath () {
+    var showPath = function showPath() {
         $("#myCanvas").removeClass("hide");
     };
 
@@ -547,7 +543,7 @@ var CrowdDetector = (function () {
             var message = {
                 id: 'getVideo',
                 sdpOffer: offerSdp,
-                url:  file_path,
+                url: file_path,
                 filter: true,
                 dots: prepare_points_server()
             };
@@ -561,8 +557,8 @@ var CrowdDetector = (function () {
         setState(I_AM_STARTING);
 
         window.console.log("Creating WebRtcPeer and generating local sdp offer ...");
+        // eslint-disable-next-line
         webRtcPeer = new kurentoUtils.WebRtcPeer.start('sendRecv', videoInput, videoOutput, onOffer, onError, null, stream);
-        prevDetection = true;
     };
 
     stop = function stop() {
@@ -591,7 +587,7 @@ var CrowdDetector = (function () {
                 webRtcVideo = null;
             }
         } else {
-            //videoInput.src = message.sdpAnswer;  // If HttpEndpoint
+            // videoInput.src = message.sdpAnswer;  // If HttpEndpoint
             window.console.log("Video received from server. Processing...");
             if (message.filter) {
                 setState(I_CAN_STOP);
@@ -626,7 +622,7 @@ var CrowdDetector = (function () {
         setIntervalX(recalculate, 500, 12);
     };
 
-    setState = function setState (nextState) {
+    setState = function setState(nextState) {
         switch (nextState) {
         case I_AM_WITH_VIDEO:
         case I_CAN_START:
@@ -648,7 +644,7 @@ var CrowdDetector = (function () {
         state = nextState;
     };
 
-    onOffer = function onOffer (offerSdp) {
+    onOffer = function onOffer(offerSdp) {
         window.console.info('Invoking SDP offer callback function ' + location.host);
         var message = {
             id: 'start',
@@ -658,8 +654,8 @@ var CrowdDetector = (function () {
         sendMessage(message);
     };
 
-    onError = function onError (error) {
-        //MashupPlatform.widget.drawAttention();
+    onError = function onError(error) {
+        // MashupPlatform.widget.drawAttention();
         MashupPlatform.widget.log(error, MashupPlatform.log.ERROR);
         hideSpinner(videoInput, videoOutput);
     };
@@ -767,18 +763,18 @@ var CrowdDetector = (function () {
 
     };
 
-    /****************************************/
-    /************AUXILIAR FUNCTIONS**********/
-    /****************************************/
+    /** **************************************/
+    /** **********AUXILIAR FUNCTIONS**********/
+    /** **************************************/
 
-    getClickPosition = function getClickPosition (e) {
+    getClickPosition = function getClickPosition(e) {
         var parentPosition = getPosition(e.currentTarget);
         var xPosition = e.clientX - parentPosition.x;
         var yPosition = e.clientY - parentPosition.y;
         return {x: xPosition, y: yPosition};
     };
 
-    var getPosition = function getPosition (element) {
+    var getPosition = function getPosition(element) {
         var xPosition = 0;
         var yPosition = 0;
 
@@ -792,7 +788,7 @@ var CrowdDetector = (function () {
 
     var noop = function () {};
 
-    var reset_timer = function reset_timer () {
+    var reset_timer = function reset_timer() {
         if (timer) {
             window.clearTimeout(timer);
             timer = window.setTimeout(stop_edit, 5000);
@@ -923,9 +919,9 @@ var CrowdDetector = (function () {
         $("#toggle-edit").text("Editing");
     };
 
-    /****************************************/
-    /*************MAIN DRAW FUNCTIONS********/
-    /****************************************/
+    /** **************************************/
+    /** ***********MAIN DRAW FUNCTIONS********/
+    /** **************************************/
 
     var showSpinner = function () {
         var number = Math.floor(Math.random() * 25) + 1;
@@ -1022,9 +1018,9 @@ var CrowdDetector = (function () {
         actions = [];
     };
 
-    /****************************************/
-    /*******CALLBACKS AND EVENT FUNCS********/
-    /****************************************/
+    /** **************************************/
+    /** *****CALLBACKS AND EVENT FUNCS********/
+    /** **************************************/
 
     _stopDrag = function (e) {
         var pos = {x: e.pos[0], y: e.pos[1]};
@@ -1065,7 +1061,7 @@ var CrowdDetector = (function () {
         if (act === undefined) {
             window.console.log("You can't redo");
         } else {
-            switch (act.action){
+            switch (act.action) {
             case ADD:
                 redo_add(act.dot, act.params.pos);
                 break;
@@ -1132,13 +1128,13 @@ var CrowdDetector = (function () {
     handle_edit = function (e) {
         if (can_edit) {
             stop_edit();
-        }else {
+        } else {
             start_edit();
         }
     };
 
     /* click handler */
-    handler = function handler (e) {
+    handler = function handler(e) {
         if (!can_edit || dragging) {
             return;
         }
@@ -1153,7 +1149,7 @@ var CrowdDetector = (function () {
     };
 
     // Double click handler
-    handler_dbl = function handler_dbl (e) {
+    handler_dbl = function handler_dbl(e) {
         if (can_edit) {
             _finishPath();
         }
@@ -1251,7 +1247,7 @@ var CrowdDetector = (function () {
         'hidePath': hidePath,
         'showPath': showPath,
         'setState': setState,
-        'send_all_wiring': send_all_wiring //,
+        'send_all_wiring': send_all_wiring // ,
         // 'start': start
     };
 

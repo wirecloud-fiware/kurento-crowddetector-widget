@@ -1,4 +1,4 @@
-/*global $, MashupPlatform, MockMP, CrowdDetector, kurentoUtils, beforeAll, afterAll*/
+/* global $, MashupPlatform, MockMP, CrowdDetector, kurentoUtils, beforeAll, afterAll*/
 
 
 (function () {
